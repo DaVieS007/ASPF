@@ -1,0 +1,11 @@
+body
+{
+	margin: 0px !important;
+	padding: 0px !important;
+	min-width: 1500px !important;
+}
+
+a
+{
+	display: none;
+}

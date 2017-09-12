@@ -1,0 +1,56 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          aspf
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      
+# Should-Stop:       
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+#
+# aspf	starts and stops the ASPF-Worker
+#
+# Copyright 2017 nPulse.net (Author: DaVieS / Hlavaji Viktor)
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+NAME=aspf
+DESC="aspf"
+APP="/opt/ASPF/CLI-Worker/aspf.php"
+
+# load LSB init-functions to get status_of_proc helper
+. /lib/lsb/init-functions
+
+PIDFILE=/var/run/aspf.pid
+
+
+test -x $DAEMON || exit 0
+
+set -e
+
+if [ ! -e `dirname $PIDFILE` ];then
+       mkdir `dirname $PIDFILE`
+fi
+
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --startas "/usr/bin/daemon" --pidfile "$PIDFILE"  -- "--user=root" "--pidfile=$PIDFILE" -- "$APP"
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	start-stop-daemon --stop $APP --oknodo \
+		--pidfile "$PIDFILE"
+	;;
+  status)
+	status_of_proc -p "$PIDFILE" "$APP" $NAME && exit 0 || exit $?
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|status}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

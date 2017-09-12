@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# $FreeBSD: 2017-09-12
+#
+
+# PROVIDE: aspf
+# REQUIRE: LOGIN
+# BEFORE: mail
+# KEYWORD: shutdown
+
+#
+# Add the following lines to /etc/rc.conf to enable clamd:
+#
+# aspf_enable="YES"
+#
+#
+
+. /etc/rc.subr
+
+name=aspf
+rcvar=aspf_enable
+
+# read settings, set default values
+load_rc_config "$name"
+
+: ${aspf_enable:=NO}
+
+command=/opt/ASPF/CLI-Worker/aspf.php
+required_dirs=/opt/ASPF/CLI-Worker
+required_files=/opt/ASPF/CLI-Worker/aspf.conf
+
+start_precmd=
+extra_commands=-daemon
+reload_cmd=
+pidfile=/var/run/aspf.pid
+
+aspf_stop() {
+    kill -9 `cat /var/run/aspf.pid`
+}
+
+aspf_onestop() {
+    kill -9 `cat /var/run/aspf.pid`
+}
+
+
+run_rc_command "$1"

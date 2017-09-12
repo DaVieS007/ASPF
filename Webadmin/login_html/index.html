@@ -1,0 +1,80 @@
+﻿<html lang="{!LANG:PREFIX}">
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US">  <!--<![endif]-->
+<head>	
+    <title>{!LANG:TITLE}</title>
+    {!HTML:META}
+    
+<link rel="stylesheet" href="/login_html/css/style.css" >
+
+<!-- FAVICONS -->
+<link rel="shortcut icon" href="/favicon.ico">
+
+</head>
+<body>
+    
+    <!--<div style="color: black; font-family: Arial; font-size: 70px; font-weight: bold; margin: 20px;">ASPF</div>-->
+                            
+    <div id="form">
+        
+        <table border="0" style="min-width: 1100px;">
+            <tr>
+                <td colspan="2">
+                    <h2>{!LANG:WELCOME} <b>{!LANG:PRODUCT}</b> {!LANG:PRODUCT2}</h2>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="innerform">
+                        <form action="" method="POST" id="">
+                            <input type="password" id="passwd" name="passwd" placeholder="{!LANG:ENTER_PASSWORD}"/>
+                            <br />
+                            <input type="button" value="{!LANG:LOGIN_BUTTON}" onclick="login();" />
+                        </form>         
+                    </div>
+                </td>
+                <td>
+                    <div id="login_help">
+                        <h4>{!LANG:LOGIN_DESC}</h4>
+                        <div id="response"></div>
+                    </div>
+                </td>                
+            </tr>
+        </table>
+    </div>
+
+
+    <script>
+
+    document.addEventListener("keydown", function (e) {
+        if (e.keyCode === 13) {  //checks whether the pressed key is "Enter"
+            login();
+            e.preventDefault();
+        }
+    });
+
+    function login()
+    {
+        if($('#passwd').val() != "")
+        {
+            $('#response').load('/{!LANG:PREFIX}/login/' + $('#passwd').val() + '/login', 
+                function() { 
+                    $('#passwd').val('');
+                });            
+        }
+    }
+    </script>
+
+
+    <script>
+    if(CB != undefined)
+    {
+        CB.token('');
+    }
+    </script>
+
+    <!-- JS -->
+    <script type="text/javascript" src="/login_html/js/jquery.js"></script>
+</body>
+</html>
