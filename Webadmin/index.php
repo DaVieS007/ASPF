@@ -1,5 +1,5 @@
 <?php
-	error_reporting(E_ALL);
+    error_reporting(E_ALL);
     /** FORCE_SSL **/
     if(!$_SERVER["HTTPS"])
     {
@@ -20,6 +20,7 @@
     require "core/punycode.inc.php";
     require "core/auth_simple.inc.php";
     require "widgets/core.php";
+    require "utils.php";
 
 
     $url = new _url();
@@ -47,8 +48,6 @@
 
     $content = "";
     $RET = "";
-
-    $TIME_FROM = $timevals[$auth->SESSION["chart_res"]];
 
     if($URL[1] == "login")
     {

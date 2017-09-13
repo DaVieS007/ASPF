@@ -203,7 +203,7 @@
         $res = $DB->query("SELECT ID,smtp_ip,smtp_name,sender_ip,sender_name,sender,recipient,action, tstamp FROM `transactions` WHERE tstamp > '".$ts."' AND (sender LIKE '%".$DB->escape($URL[2])."%' OR recipient LIKE '%".$DB->escape($URL[2])."%' ) LIMIT 0,200");
         while($row = $res->fetch_array())
         {
-            $sender = $row["sender"];
+            $sender = mailb($row["sender"],40);
             if($row["action"] == "blacklist")
             {
                 $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("BLACKLISTED"),"danger");
@@ -235,7 +235,7 @@
             $nurl[3] = $row["ID"];
             $table["td"][] = array(
                 $sender,
-                $row["recipient"],
+                mailb($row["recipient"],40),
                 $row["smtp_ip"]."<br />".$widget->badge($row["smtp_name"],"primary"),
                 $row["sender_ip"]."<br />".$widget->badge($row["sender_name"],"primary"),
                 date($config["date_format"],$row["tstamp"]),

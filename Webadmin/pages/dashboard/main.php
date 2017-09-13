@@ -72,30 +72,6 @@
 		}
 	}
 
-
-	/**
-
-SPAM_DETECT[spam_mitigation_level] 
-5
-SPAM_DETECT[drop_mail_instead_of_mark_spam] 
-SPAM_DETECT[rbl_list] 
-spam.spamrats.com,sbl.spamhaus.org,pbl.spamhaus.org,xbl.spamhaus.org,zen.spamhaus.org,b.barracudacentral.org,bl.spamcop.net,cbl.abuseat.org,dnsbl.dronebl.org,rbl.megarbl.net
-GRAYLIST[gray_learn_recipient_domain] 
-GRAYLIST[gray_learn_recipient_mail] 
-1
-GRAYLIST[gray_learn_expire] 
-14
-GRAYLIST[gray_cache_expire] 
-7
-ANTISPAM[limit_mails_per_user] 
-50
-ANTISPAM[enable_limit_reject] 
-1
-ANTISPAM[notify_command]
-
-
-	**/
-
 	/** NODE EDIT **/
 	else
 	{
@@ -198,7 +174,7 @@ ANTISPAM[notify_command]
 		$res = $DB->query("SELECT ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND (action = 'limit' OR action = 'blacklist' OR action = 'reject' OR action = 'dunno') GROUP BY sender ORDER BY `tstamp` DESC");
 		while($row = $res->fetch_array())
 		{
-			$sender = $row["sender"];
+			$sender = mailb($row["sender"]);
 			if($row["action"] == "blacklist")
 			{
 				$sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("BLACKLISTED"),"danger");
@@ -239,7 +215,7 @@ ANTISPAM[notify_command]
 		$res = $DB->query("SELECT COUNT(ID) AS CC, sender, action FROM `transactions` WHERE tstamp > '".$ts."' AND (action = 'sent' OR action = 'limit' OR action = 'blacklist') GROUP BY sender ORDER BY `CC` DESC LIMIT 0,50");
 		while($row = $res->fetch_array())
 		{
-			$sender = $row["sender"];
+			$sender = mailb($row["sender"]);
 			if($row["action"] == "blacklist")
 			{
 				$sender .= "<br />".$widget->badge(L("BLACKLISTED"),"danger");
@@ -270,7 +246,7 @@ ANTISPAM[notify_command]
 		$res = $DB->query("SELECT COUNT(ID) AS CC, sender, action FROM `transactions` WHERE tstamp > '".$ts."' AND (action = 'accept' OR action = 'dunno' OR action = 'reject') GROUP BY sender ORDER BY `CC` DESC LIMIT 0,50");
 		while($row = $res->fetch_array())
 		{
-			$sender = $row["sender"];
+			$sender = mailb($row["sender"]);
 			if($row["action"] == "reject")
 			{
 				$sender .= "<br />".$widget->badge(L("REJECTED"),"danger");
