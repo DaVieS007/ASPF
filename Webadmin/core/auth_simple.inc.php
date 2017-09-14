@@ -67,10 +67,10 @@
 		function logout()
 		{
 			global $url;
-			$this->check();
 
-			unset($this->SESSION["back_menu"]);
-			unset($this->SESSION["user_session"]);
+			$this->SESSION["back_menu"] = "";
+			$this->SESSION["user_session"] = "";
+			
 			$url->go(array());
 		}
 		/** LOGOUT **/
