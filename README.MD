@@ -49,6 +49,23 @@ smtpd_recipient_restrictions =
   -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks
 ````
 
+#### Dovecot/Sieve FOLDER/DROP
+````
+# Move spam to spam folder
+if header :contains "X-Spam-Flag" "YES" {
+        fileinto "Junk";
+        # Stop here so that we do not reply on spams
+        stop;
+}
+
+if header :contains "X-ASPF" "!REJECT" {
+        fileinto "Junk";
+        # Stop here so that we do not reply on spams
+        stop;
+}
+````
+
+
 ### Exim Configuration
 ````
 acl_check_message:
@@ -63,7 +80,7 @@ warn message     = ${sg{$acl_m0}{^\\w+\\s*}{}}
        condition   = ${if eq{${uc:${substr{0}{7}{$acl_m0}}}}{PREPEND}{true}{false}}
 ````
 
-### SPAM FOLDER/DROP
+#### SPAM FOLDER/DROP
 ````
 maildir_spam:
  driver = accept
