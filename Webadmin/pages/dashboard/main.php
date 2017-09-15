@@ -122,7 +122,7 @@
 		
 		$ts = time() - 3600*$config["show_latest"];
 		$sent = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE action = 'sent' AND tstamp > '".$ts."'")->fetch_array()["CC"];
-		$reject = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'limit' OR action = 'blacklist') AND tstamp > '".$ts."'")->fetch_array()["CC"];
+		$reject = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'limit') AND tstamp > '".$ts."'")->fetch_array()["CC"];
 	
 		$accept = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE action = 'accept' AND tstamp > '".$ts."'")->fetch_array()["CC"];
 		$dunno = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'dunno' OR action = 'reject') AND tstamp > '".$ts."'")->fetch_array()["CC"];
@@ -168,13 +168,14 @@
 	
 		$A = $widget->row();
 	
-		/** LAST_NEGATIVE **/
+		/** LAST_LIMITED **/
 		$table = array();
 		$table["th"] = array(L("SENDER"),L("DATE"),"");
-		$res = $DB->query("SELECT ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND (action = 'limit' OR action = 'blacklist' OR action = 'reject' OR action = 'dunno') GROUP BY sender ORDER BY `tstamp` DESC");
+		$res = $DB->query("SELECT COUNT(ID) AS CC,ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND (action = 'limit') GROUP BY sender ORDER BY `tstamp` DESC");
 		while($row = $res->fetch_array())
 		{
 			$sender = mailb($row["sender"]);
+			$sender .= " (".$row["CC"].")";
 			if($row["action"] == "blacklist")
 			{
 				$sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("BLACKLISTED"),"danger");
@@ -200,8 +201,8 @@
 			
 		}
 	
-		$widget->table(12,L("LAST_NEGATIVE"),$table["th"],$table["td"],"dt_negatives","1:desc");
-		/** LAST_NEGATIVE **/
+		$widget->table(12,L("LAST_LIMITED"),$table["th"],$table["td"],"dt_negatives","1:desc");
+		/** LAST_LIMITED **/
 	
 		$B = $widget->row();
 	

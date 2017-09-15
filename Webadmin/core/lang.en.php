@@ -18,6 +18,10 @@ $L["mitigation_3"] = "Level 3: Mark as SPAM when: When sender SMTP Server (MX) i
 $L["mitigation_4"] = "Level 4: RBL Lookup";
 $L["mitigation_5"] = "Level 5: Mark as SPAM when: Contains noreply or bounce";
 
+$L["last_limited"] = "Limited Mails";
+$L["whitelist_help"] = "Whitelisted mails or domains immediately accepted, but outgoing limits will be applied independently.";
+$L["blacklist_help"] = "Blacklisted mails or domains immediately marks as SPAM and outgoing sendings from these address is prohibited too.";
+
 $L["rbl_list"] = "RBL List";
 $L["drop_mail_instead_of_mark"] = "Drop Mail instead of mark as SPAM (No SPAM Folder)";
 $L["gray_learn_recip_domain"] = "Add all remote recipients's domain to whitelist";

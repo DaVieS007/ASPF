@@ -18,6 +18,10 @@ $L["mitigation_3"] = "Szint 3: Jelöld SPAMnek: Küldő SMTP szervere nem képes
 $L["mitigation_4"] = "Szint 4: RBL Lookup";
 $L["mitigation_5"] = "Szint 5: Jelöld SPAMnek: noreply vagy bounce szerepel a feladóban";
 
+$L["last_limited"] = "Limitált Küldések";
+$L["whitelist_help"] = "Fehérlistázod levelek és domainek egyből ellesznek fogadva, azonban a kifelé küldés limitekre nincs hatással.";
+$L["blacklist_help"] = "Feketelistázott levelek és domainek egyből SPAMként értelmeződnek, illetve ezekről a címekről kifelé sem enged küldeni.";
+
 $L["rbl_list"] = "RBL Lista";
 $L["drop_mail_instead_of_mark"] = "Dobja el a levelet, jelölés helyett (nincs SPAM mappa)";
 $L["gray_learn_recip_domain"] = "Minden távoli címzett domainja fehérlistára vétele";
