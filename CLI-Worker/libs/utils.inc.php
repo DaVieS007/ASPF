@@ -57,8 +57,13 @@
     function mlog($node,$type,$message)
     {
         global $config;
-        $tmp = date($config["SERVER"]["date_format"],time())." | [".$node."] ".$message."\n";
-        echo($tmp);
+        global $silent;
+
+        if(!$silent)
+        {
+            $tmp = date($config["SERVER"]["date_format"],time())." | [".$node."] ".$message."\n";
+            echo($tmp);    
+        }
     }
     /** MLOG **/
 

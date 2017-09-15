@@ -4,11 +4,12 @@
     /** DAEMONIZE **/
     if($argv[1] == "-daemon")
     {
+        $DAEMONIZED = true;
 	    $pid = pcntl_fork();
 	    if($pid)
 	    {
-		file_put_contents("/var/run/aspf.pid",$pid);
-		die();
+		    file_put_contents("/var/run/aspf.pid",$pid);
+		    die();
 	    }
     }
     /** DAEMONIZE **/
@@ -96,6 +97,11 @@
     if(!$inet4 && !$inet6)
     {
         die();
+    }
+
+    if($DAEMONIZED)
+    {
+        $silent = true;
     }
 
     if($config["SERVER"]["max_workers"] < 1)

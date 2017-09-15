@@ -25,13 +25,13 @@ load_rc_config "$name"
 
 : ${aspf_enable:=NO}
 
-command=/opt/ASPF/CLI-Worker/aspf.php
-command_interpreter=/usr/local/bin/php
-required_dirs=/opt/ASPF/CLI-Worker
-required_files=/opt/ASPF/CLI-Worker/aspf.conf
+command=/Storage/System/ASPF/aspf.php
+command_interpreter=/usr/bin/php
+required_dirs=/Storage/System/ASPF
+required_files=/Storage/System/ASPF/aspf.conf
+start_cmd="$command -daemon"
 
 start_precmd=
-extra_commands=-daemon
 reload_cmd=
 pidfile=/var/run/aspf.pid
 

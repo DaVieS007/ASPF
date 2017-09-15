@@ -1,14 +1,53 @@
 # ASPF 
 ## Advanced SPAM Processing Filter
-### STILL-IN_DEVELOPMEN
-### Features
-- Ongoing Limitation Rules
-- Incoming Messages Filtering
-- Possibly use of central mail features
+### Part of MVCP Mass Virtualhost Control Panel (BSD)
+
+##### Author
+- Hlavaji Viktor / DaVieS (davies@npulse.net)
+
+##### Credits
+- Thanks for Systech Global Kft for testing and funding this project (https://systech.hu)
 
 ### Workflow
+- Written in PHP, Compatible with PHP5 and above included PHP7.1
 - The software listens on TCP 10099 (both INET4 and INET6)
-- Add content policy to inet:127.0.0.1:10099 or [::1]:10099
+- Analyze SMTP Fields then register action in mySQL database
+- Only need to add content policy to inet:127.0.0.1:10099 or [::1]:10099 (on postfix)
+- This software not processing any content of mails, just playing with SMTP fields
+- There several SPAM filtering levels which can be adjusted on the config or from webadmin
+- This Package includes webadmin
+- Enterprise Class Centralized Statistics from mail sending and receiving operations
+- Supports: Postfix, Exim
+- Tested on Debian based Linux and FreeBSD: (For compat, you may need symlink /usr/local/bin/php -> /usr/bin/php)
+
+### Features
+- Statistics
+- Whitelist address / domain Based
+- Blacklist address / domain Based
+- Sending Limits address / domain Based
+- Graylist operation (Auto-Learn)
+- Configurable RBL Lists / per server
+- Configurable SPAM Detection algorythm / per server
+
+
+### How to Install
+#### Linux:
+- Extract this package in /opt init scripts are included
+- Setup mySQL Database (included) and mySQL account
+- Configure with **aspf.conf**
+- Copy init script to /etc/init.d
+- Then run: **update-rc.d aspf_linux defaults**
+- Start the script: **service aspf_linux start**
+- Create a PHP VirtualHost for ASPF Webadmin then log-in
+
+#### FreeBSD:
+- Extract this package in /opt init scripts are icluded
+- Setup mySQL Database (included) and mySQL account
+- Configure with **aspf.conf**
+- Copy init script to /usr/local/etc/rc.d then rename it to aspf
+- Add to rc.conf or rc.conf.d **aspf_enable="YES"**
+- Start the script: **service aspf start**
+- Create a PHP VirtualHost for ASPF Webadmin
 
 ### Postfix Configuration
 
