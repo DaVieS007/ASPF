@@ -148,7 +148,12 @@
 
             if($node)
             {
-                $config = $node["settings"];
+                /** OVERRIDE **/
+                $config["SPAM_DETECT"] = $node["settings"]["SPAM_DETECT"];
+                $config["GRAYLIST"] = $node["settings"]["GRAYLIST"];
+                $config["ANTISPAM"] = $node["settings"]["ANTISPAM"];
+                /** OVERRIDE **/
+
                 $DB->query("UPDATE nodes SET last_seen = '".time()."' WHERE ID = '".$node["ID"]."'");
             }
             /** CHECK NODES **/
