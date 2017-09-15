@@ -23,13 +23,6 @@
     require "utils.php";
 
 
-    $url = new _url();
-    if(isset($_GET["lang"]))
-    {
-        $URL[0] = $_GET["lang"];
-        $url->go($URL);
-    }
-
 	$DB = new database_handler($config["mysql_host"],$config["mysql_user"],$config["mysql_passwd"],$config["mysql_db"]);
 
     $registry = new registry_fs("registry.db");
@@ -39,6 +32,14 @@
     $auth = new auth_simple($registry);
 
     $URL = $url->get();
+
+    $url = new _url();
+    if(isset($_GET["lang"]))
+    {
+        $URL[0] = $_GET["lang"];
+        $url->go($URL);
+    }
+
 
     $lang = new _lang();
     $lang->init();

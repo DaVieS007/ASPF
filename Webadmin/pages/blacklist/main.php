@@ -42,6 +42,7 @@
     $widget->form_input("sender","text",L("SENDER_OR_DOMAIN"),"","");
     $widget->form_select("expire",L("EXPIRE"),"",$sel,0);
     $widget->form(4,"danger",L("ADD_TO_LIST"),L("FORM_SUBMIT"),$url->write($curl));
+    $widget->lead(8,L("BLACKLIST_HELP"));
     $CONTENT .= $widget->row();
 
     if($_GET["remove"])
