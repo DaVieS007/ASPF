@@ -20,6 +20,10 @@
 	{
 		require "pages/blacklist/main.php";
 	}
+	elseif($URL[1] == "limits")
+	{
+		require "pages/limits/main.php";
+	}
 	else
 	{
 		$widget->head(12,L("404_NOT_FOUND"));

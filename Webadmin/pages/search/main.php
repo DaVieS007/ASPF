@@ -200,7 +200,7 @@
         /** RESULTS **/
         $table = array();
         $table["th"] = array(L("SENDER"),L("RECIPIENT"),L("SMTP_NAME"),L("SENDER_NAME"),L("DATE"),"");
-        $res = $DB->query("SELECT ID,smtp_ip,smtp_name,sender_ip,sender_name,sender,recipient,action, tstamp FROM `transactions` WHERE tstamp > '".$ts."' AND (sender LIKE '%".$DB->escape($URL[2])."%' OR recipient LIKE '%".$DB->escape($URL[2])."%' ) LIMIT 0,200");
+        $res = $DB->query("SELECT ID,smtp_ip,smtp_name,sender_ip,sender_name,sender,recipient,action, tstamp FROM `transactions` WHERE tstamp > '".$ts."' AND (sender LIKE '%".$DB->escape($URL[2])."%' OR recipient LIKE '%".$DB->escape($URL[2])."%' ) LIMIT 0,1000");
         while($row = $res->fetch_array())
         {
             $sender = mailb($row["sender"],40);
@@ -244,7 +244,7 @@
             
         }
 
-	    $widget->table(12,"",$table["th"],$table["td"],"dt_results","2:desc");
+	    $widget->table(12,"",$table["th"],$table["td"],"dt_results","4:desc");
 	    /** RESULTS **/        
     }
 

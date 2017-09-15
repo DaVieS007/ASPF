@@ -21,6 +21,18 @@ $L["mitigation_5"] = "Level 5: Mark as SPAM when: Contains noreply or bounce";
 $L["last_limited"] = "Limited Mails";
 $L["whitelist_help"] = "Whitelisted mails or domains immediately accepted, but outgoing limits will be applied independently.";
 $L["blacklist_help"] = "Blacklisted mails or domains immediately marks as SPAM and outgoing sendings from these address is prohibited too.";
+$L["sending_limit"] = "Mail sending limit / 5 minutes";
+$L["limit"] = "Limit";
+$L["mail_limit"] = "Mail Limit";
+$L["domain_limit"] = "Domain Limit";
+$L["sender_domain"] = "Sender Domain";
+
+$L["limits"] = "Sending Limits";
+
+$L["404_not_found"] = "404 The page that you requested is not found";
+$L["404_not_found_desc"] = "Try navigate to another page";
+
+
 
 $L["rbl_list"] = "RBL List";
 $L["drop_mail_instead_of_mark"] = "Drop Mail instead of mark as SPAM (No SPAM Folder)";

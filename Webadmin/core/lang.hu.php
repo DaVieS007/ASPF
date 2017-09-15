@@ -21,6 +21,16 @@ $L["mitigation_5"] = "Szint 5: Jelöld SPAMnek: noreply vagy bounce szerepel a f
 $L["last_limited"] = "Limitált Küldések";
 $L["whitelist_help"] = "Fehérlistázod levelek és domainek egyből ellesznek fogadva, azonban a kifelé küldés limitekre nincs hatással.";
 $L["blacklist_help"] = "Feketelistázott levelek és domainek egyből SPAMként értelmeződnek, illetve ezekről a címekről kifelé sem enged küldeni.";
+$L["sending_limit"] = "Levél Küldési Limit / 5 perc";
+$L["limit"] = "Limit";
+$L["mail_limit"] = "Mail Limit";
+$L["domain_limit"] = "Domain Limit";
+$L["sender_domain"] = "Küldő Domain";
+
+$L["limits"] = "Küldési Limitek";
+
+$L["404_not_found"] = "404 A keresett oldal nem található";
+$L["404_not_found_desc"] = "Próbáljon meg átnavigálni egy létező oldalra";
 
 $L["rbl_list"] = "RBL Lista";
 $L["drop_mail_instead_of_mark"] = "Dobja el a levelet, jelölés helyett (nincs SPAM mappa)";

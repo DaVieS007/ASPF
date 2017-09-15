@@ -23,22 +23,22 @@
     require "utils.php";
 
 
-	$DB = new database_handler($config["mysql_host"],$config["mysql_user"],$config["mysql_passwd"],$config["mysql_db"]);
+    $url = new _url();
+    $URL = $url->get();
+    
+    if(isset($_GET["lang"]))
+    {
+        $URL[0] = $_GET["lang"];
+        $url->go($URL);
+    }
+    
+    $DB = new database_handler($config["mysql_host"],$config["mysql_user"],$config["mysql_passwd"],$config["mysql_db"]);
 
     $registry = new registry_fs("registry.db");
     $punycode = new Punycode();
     $widget = new widget();
     $registry->cleanup();
     $auth = new auth_simple($registry);
-
-    $URL = $url->get();
-
-    $url = new _url();
-    if(isset($_GET["lang"]))
-    {
-        $URL[0] = $_GET["lang"];
-        $url->go($URL);
-    }
 
 
     $lang = new _lang();
