@@ -44,6 +44,15 @@
         }
         /** TRY BLACKLIST **/
 
+        /** TRY BLACK/WHITELIST **/
+        $sender_rule = $DB->query("SELECT type,expire FROM senders WHERE address = '".$DB->escape($sender)."' AND expire > '".time()."';")->fetch_array();
+        if($sender_rule["type"] == "blacklist")
+        {
+            $msg = "ASPF: Your message is rejected due sender address is on blacklist until: ".sdate($sender_rule["expire"]);
+            return "reject";
+        }
+        /** TRY BLACK/WHITELIST **/
+
         /** GET_LIMIT **/
         $limit = $DB->query("SELECT `limit` FROM mail_limit WHERE address = '".$DB->escape($sender)."'")->fetch_array()["limit"];
         if(!$limit)
