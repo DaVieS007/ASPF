@@ -135,7 +135,7 @@
             add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
             if($ret == "dunno")
             {
-                if($config["drop_mail_instead_of_mark_spam"])
+                if($config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"])
                 {
                     mlog("Validate","NOTICE","[".$msg."] ".$arr["sender"]." -> ".$arr["recipient"]);
                     socket_write($client,"action=REJECT ".$msg."\n");
