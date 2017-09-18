@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+    $DAEMONIZED = NULL;
     /** DAEMONIZE **/
     if($argv[1] == "-daemon")
     {
