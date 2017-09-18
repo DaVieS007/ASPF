@@ -1,16 +1,26 @@
 #!/usr/bin/php
 <?php
-    
     /** DAEMONIZE **/
     if($argv[1] == "-daemon")
     {
+        umask(0);
+	    $opid = getmypid();
         $DAEMONIZED = true;
-	    $pid = pcntl_fork();
+        $pid = pcntl_fork();
+        
 	    if($pid)
 	    {
-		    file_put_contents("/var/run/aspf.pid",$pid);
-		    die();
-	    }
+		    exit;
+        }
+        elseif($pid == -1)
+        {
+            echo("Error: Could not fork();");
+        }
+        else
+        {
+            file_put_contents("/var/run/aspf.pid",posix_getpid());   
+            $sid = posix_setsid(); //DETACH FROM SESSION
+        }
     }
     /** DAEMONIZE **/
 
@@ -102,6 +112,9 @@
     if($DAEMONIZED)
     {
         $silent = true;
+        fclose(STDIN);  
+        fclose(STDOUT); 
+        fclose(STDERR);
     }
 
     if($config["SERVER"]["max_workers"] < 1)
