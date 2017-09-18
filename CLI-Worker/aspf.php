@@ -124,6 +124,8 @@
     }
     /** FAULT_CHECK **/
 
+    $MPID = posix_getpid();
+
     /** PROCESS_CLIENTS & ACCEPT_CONNECTIONS **/
     $clients = array();
     $nodes = array();
@@ -236,12 +238,20 @@
         }
         catch (Throwable $t)
         {
-           mlog("Core","PANIC","PANIC: ".$t->getMessage()."\n");
+           mlog("Core","PANIC",$t->getFile().":".$t->getLine().": ".$t->getMessage());
+		   if($MPID != posix_getpid())
+		   {
+			   die();
+		   }           
         }        
         catch(Exception $e)
         {
-            mlog("Core","PANIC","PANIC: ".$e->getMessage()."\n");
-        }
+            mlog("Core","PANIC",$t->getFile().":".$t->getLine().": ".$t->getMessage());
+            if($MPID != posix_getpid())
+            {
+                die();
+            }           
+         }
     }
     /** PROCESS_CLIENTS & ACCEPT_CONNECTIONS **/
 ?>
