@@ -225,9 +225,9 @@
         {
            mlog("Core","PANIC","PANIC: ".$t->getMessage()."\n");
         }        
-        catch(Excpetion $e)
+        catch(Exception $e)
         {
-            mlog("Core","PANIC","PANIC: ".$t->getMessage()."\n");
+            mlog("Core","PANIC","PANIC: ".$e->getMessage()."\n");
         }
     }
     /** PROCESS_CLIENTS & ACCEPT_CONNECTIONS **/
