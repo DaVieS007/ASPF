@@ -6,7 +6,7 @@ $L["lang_prefix"] = "hu";
 $L["prefix"] = "hu";
 
 $L["edit"] = "Szerkesztés";
-$L["welcome"] = "Üdvözöljük a ";
+$L["welcome"] = "Üdvözöljük a(z) ";
 $L["product"] = "ASPF";
 $L["product2"] = "rendszerében!";
 
@@ -50,7 +50,8 @@ $L["dashboard_desc"] = "Üdvözöljük, {!USER:NAME}!";
 
 $L["enter_password"] = "Adja meg a jelszavát";
 $L["login_button"] = "Biztonságos Bejelentkezés";
-$L["login_desc"] = "Kérjük <span>jelentkezzen be</span> a rendszer használatához!<br /><strong>Rendszerünk védett a támadásokkal szemben.</strong>";
+$L["login_desc"] = "Kérjük <span>jelentkezzen be</span> a rendszer használatához!";
+$L["login_desc2"] = "Adja meg a jelszavát!";
 
 $L["login_failed"] = "A belépés sikertelen, nem megfelelő adatok!";
 $L["form_submit"] = "Változások Mentése";

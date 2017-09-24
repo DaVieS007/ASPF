@@ -52,7 +52,8 @@ $L["dashboard_desc"] = "Welcome, {!USER:NAME}!";
 
 $L["enter_password"] = "Type your password";
 $L["login_button"] = "Secure Log In";
-$L["login_desc"] = "Pleae <span>login</span> to use this system!<br /><strong>Our system is protected against any attacks.</strong>";
+$L["login_desc"] = "Please <span>login</span> to use this system!";
+$L["login_desc2"] = "Type your Password!";
 
 $L["login_failed"] = "Invalid Credentials!";
 $L["form_submit"] = "Change Saves";
