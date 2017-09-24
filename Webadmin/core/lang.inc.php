@@ -31,8 +31,9 @@
 
         var $curlang;
 
-        function prefered_language(array $available_languages, $http_accept_language) {
-
+        function prefered_language(array $available_languages, $http_accept_language) 
+        {
+	    $langs = array();
             $available_languages = array_flip($available_languages);
 
             preg_match_all('~([\w-]+)(?:[^,\d]+([\d.]+))?~', strtolower($http_accept_language), $matches, PREG_SET_ORDER);
