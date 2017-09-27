@@ -171,7 +171,7 @@
 		/** LAST_LIMITED **/
 		$table = array();
 		$table["th"] = array(L("SENDER"),L("DATE"),"");
-		$res = $DB->query("SELECT COUNT(ID) AS CC,ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND (action = 'limit') GROUP BY sender ORDER BY `tstamp` DESC");
+		$res = $DB->query("SELECT COUNT(ID) AS CC,ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND action = 'limit' GROUP BY sender ORDER BY `tstamp` DESC");
 		while($row = $res->fetch_array())
 		{
 			$sender = mailb($row["sender"]);
@@ -252,7 +252,7 @@
 			{
 				$sender .= "<br />".$widget->badge(L("REJECTED"),"danger");
 			}
-			if($row["action"] == "dunno")
+			else if($row["action"] == "dunno")
 			{
 				$sender .= "<br />".$widget->badge(L("DUNNO"),"warning");
 			}
