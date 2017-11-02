@@ -8,6 +8,10 @@
 ##### Credits
 - Thanks for Systech Global Kft for testing and funding this project (https://systech.hu)
 
+##### Screnshots
+![ASPF Summary](/aspf-1.png?raw=true "ASPF Summary")
+![ASPF Search](/aspf-1.png?raw=true "ASPF Search")
+
 ### Workflow
 - Written in PHP, Compatible with PHP5 and above included PHP7.1
 - The software listens on TCP 10099 (both INET4 and INET6)
@@ -27,7 +31,7 @@
 - Sending Limits address / domain Based
 - Graylist operation (Auto-Learn)
 - Configurable RBL Lists / per server
-- Configurable SPAM Detection algorythm / per server
+- Configurable SPAM Detection algorythm / per server / address / domain
 
 
 ### How to Install
