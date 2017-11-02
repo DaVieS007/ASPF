@@ -24,6 +24,10 @@
 	{
 		require "pages/limits/main.php";
 	}
+	elseif($URL[1] == "clevel")
+	{
+		require "pages/clevel/main.php";
+	}
 	else
 	{
 		$widget->head(12,L("404_NOT_FOUND"));

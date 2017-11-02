@@ -30,6 +30,13 @@
 					while(list($k,$v) = each($_POST))
 					{
 						$key = explode("|",$k);
+						if($k == "SPAM_DETECT|rbl_list")
+						{
+							$v = str_replace("\n",",",$v);
+							$v = str_replace(" ","",$v);
+							$v = str_replace(",,",",",$v);
+						}
+
 						$config[$key[0]][$key[1]] = $v;
 					}
 					$DB->query("UPDATE nodes SET settings = '".$DB->escape(json_encode($config))."' WHERE ID = '".$settings["ID"]."'");
@@ -51,19 +58,22 @@
 			
 			
 
-			$widget->form_select("SPAM_DETECT|spam_mitigation_level",L("MITIGATION_LEVEL"),"",$mitigation_level,$config["SPAM_DETECT"]["spam_mitigation_level"]);
-			$widget->form_select("SPAM_DETECT|drop_mail_instead_of_mark_spam",L("DROP_MAIL_INSTEAD_OF_MARK"),"",$sel,$config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"]);
-			$widget->form_input("SPAM_DETECT|rbl_list","text",L("RBL_LIST"),"",$config["SPAM_DETECT"]["rbl_list"]);						
-
-			$widget->form_select("GRAYLIST|gray_learn_recipient_domain",L("GRAY_LEARN_RECIP_DOMAIN"),"",$sel,$config["GRAYLIST"]["gray_learn_recipient_domain"]);
-			$widget->form_select("GRAYLIST|gray_learn_recipient_mail",L("GRAY_LEARN_RECIP"),"",$sel,$config["GRAYLIST"]["gray_learn_recipient_mail"]);
-			$widget->form_input("GRAYLIST|gray_learn_expire","text",L("GRAY_LEARN_EXPIRE"),"",$config["GRAYLIST"]["gray_learn_expire"]);						
-			$widget->form_input("GRAYLIST|gray_cache_expire","text",L("GRAY_CACHE_EXPIRE"),"",$config["GRAYLIST"]["gray_cache_expire"]);						
-			
-			$widget->form_input("ANTISPAM|limit_mails_per_user","text",L("LIMIT_MAILS_PER_USER"),"",$config["ANTISPAM"]["limit_mails_per_user"]);						
-			$widget->form_select("ANTISPAM|enable_limit_reject",L("ENABLE_LIMIT_REJECT"),"",$sel,$config["ANTISPAM"]["enable_limit_reject"]);
-			$widget->form_input("ANTISPAM|notify_command","text",L("NOTIFY_COMMAND"),"",$config["ANTISPAM"]["notify_command"]);						
-			$widget->form_select("delete",L("DELETE"),"",$sel,0);
+			$widget->form_select("SPAM_DETECT|spam_mitigation_level",L("MITIGATION_LEVEL"),"",$mitigation_level,$config["SPAM_DETECT"]["spam_mitigation_level"],2);
+			$widget->form_select("SPAM_DETECT|drop_mail_instead_of_mark_spam",L("DROP_MAIL_INSTEAD_OF_MARK"),"",$sel,$config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"],2);
+			$widget->form_sep();
+			$widget->form_text("SPAM_DETECT|rbl_list",L("RBL_LIST"),"",str_replace(",","\n",$config["SPAM_DETECT"]["rbl_list"]));						
+			$widget->form_sep();			
+			$widget->form_select("GRAYLIST|gray_learn_recipient_domain",L("GRAY_LEARN_RECIP_DOMAIN"),"",$sel,$config["GRAYLIST"]["gray_learn_recipient_domain"],2);
+			$widget->form_select("GRAYLIST|gray_learn_recipient_mail",L("GRAY_LEARN_RECIP"),"",$sel,$config["GRAYLIST"]["gray_learn_recipient_mail"],2);
+			$widget->form_sep();			
+			$widget->form_input("GRAYLIST|gray_learn_expire","text",L("GRAY_LEARN_EXPIRE"),"",$config["GRAYLIST"]["gray_learn_expire"],4);						
+			$widget->form_input("GRAYLIST|gray_cache_expire","text",L("GRAY_CACHE_EXPIRE"),"",$config["GRAYLIST"]["gray_cache_expire"],4);						
+			$widget->form_input("ANTISPAM|limit_mails_per_user","text",L("LIMIT_MAILS_PER_USER"),"",$config["ANTISPAM"]["limit_mails_per_user"],3);						
+			$widget->form_select("ANTISPAM|enable_limit_reject",L("ENABLE_LIMIT_REJECT"),"",$sel,$config["ANTISPAM"]["enable_limit_reject"],4);
+			$widget->form_sep();						
+			$widget->form_input("ANTISPAM|notify_command","text",L("NOTIFY_COMMAND"),"",$config["ANTISPAM"]["notify_command"],2);						
+			$widget->form_select("delete",L("DELETE"),"",$sel,0,4);
+			$widget->form_sep();						
 			
 		
 			

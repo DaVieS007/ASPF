@@ -27,6 +27,13 @@ $L["mail_limit"] = "Mail Limit";
 $L["domain_limit"] = "Domain Limit";
 $L["sender_domain"] = "Küldő Domain";
 
+$L["custom_levels"] = "Egyedi Szintek";
+$L["clevel_help"] = "Egyedi SPAM szűrési szintek domain vagy mail cím alapján.";
+$L["clevel_mails"] = "E-Mail szintű egyedi szűrés";
+$L["clevel_domains"] = "Domain szintű egyedi szűrés";
+$L["clevel"] = "Szűrési Szint";
+$L["domain"] = "Domain";
+
 $L["limits"] = "Küldési Limitek";
 
 $L["404_not_found"] = "404 A keresett oldal nem található";

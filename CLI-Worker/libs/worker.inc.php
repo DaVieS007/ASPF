@@ -166,38 +166,7 @@
             socket_write($client,"invalid-command\n");
             return false;
         }
-        
-/*
-        request=smtpd_access_policy
-        protocol_state=RCPT
-        protocol_name=ESMTP
-        client_address=37.221.209.64
-        client_name=web.npulse.net
-        client_port=60752
-        reverse_client_name=web.npulse.net
-        server_address=37.221.209.67
-        server_port=25
-        helo_name=web.npulse.net
-        sender=davies@npulse.net
-        recipient=davies@impulsive.hu
-        recipient_count=0
-        queue_id=
-        instance=8da8.59a322a4.95b61.0
-        size=1066
-        etrn_domain=
-        stress=
-        sasl_method=
-        sasl_username=
-        sasl_sender=
-        ccert_subject=
-        ccert_issuer=
-        ccert_fingerprint=
-        ccert_pubkey_fingerprint=
-        encryption_protocol=TLSv1.2
-        encryption_cipher=AECDH-AES256-SHA
-        encryption_keysize=256
-        policy_context=
-*/                
+  
     }
     /** WORKER **/
 ?>

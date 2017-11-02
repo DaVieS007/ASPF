@@ -57,80 +57,12 @@
 		}
 		/** LEAD **/
 
-		function kiosk_login($cb_url)
+		/** SIGN **/
+		function sign($text)
 		{
-			$hash = "H".md5($cb);
-
-			$data = <<<EOF
-
-			<img id="N[HASH]" style="display: none; position: relative; margin-left: -128px; left: 50%; width: 256px;" src="/common_html/images/nfc.png" />
-			<img id="R[HASH]" style="display: none; position: relative; margin-left: -128px; left: 50%; width: 256px;" src="/admin_html/images/ripple.svg" />
-			<div id="T[HASH]" style="text-align: center; width: 100%; font-size: 24px; font-weight: bold;"></div>
-			<input type="text" style="position: relative; border: 0px; color: transparent; outline: none; width: 400px; left: 50%; margin-left: -200px;" id="[HASH]">
-
-			
-			<script>
-			var last_key = 0;
-
-			$( document ).ready(function() {
-			    $('#[HASH]').focus();
-			    $('#N[HASH]').fadeIn(2000);	
-			});				
-
-		    $('#[HASH]').focusout(function() {
-		    	$('#[HASH]').focus();
-		    });
-
-			$('#[HASH]').keyup(function() {
-				last_key = $.now();
-				$('#N[HASH]').hide();
-				$('#R[HASH]').show();
-				$('#T[HASH]').html("");
-			});
-
-			function check_login()
-			{
-				console.log("check_login()");
-				var login_input = $('#[HASH]').val();
-				if(login_input.length > 0)
-				{
-					if(last_key != 0 && last_key + 500 < $.now())
-					{
-						$('#[HASH]').val("");
-						console.log("CHECKING: " + login_input);
-						$('#T[HASH]').load('?[CB]' + "=" + login_input,function() { 
-							$('#R[HASH]').hide();
-							$('#N[HASH]').fadeIn(2000);							
-						});
-						last_key = 0;
-					}
-
-					if(last_key == 0 || last_key + 2000 < $.now())
-					{
-						if($('#R[HASH]').is(':visible'))
-						{
-							$('#R[HASH]').hide();
-							$('#N[HASH]').fadeIn(2000);																				
-						}
-					}
-				}
-
-
-				setTimeout(check_login, 100);
-			}
-
-			setTimeout(check_login, 1000);
-
-			</script>
-
-EOF;
-
-			$data = str_replace("[HASH]",$hash,$data);
-			$data = str_replace("[CB]",$cb_url,$data);
-
-
-			$this->temp .= $data;
+			return '<div style="font-weight: bold; position: absolute; bottom: 0; right: 25px; font-size: 12px;">'.$text.'</div>';
 		}
+		/** SIGN **/
 
 		/** PRELOAD **/
 		function preload($col,$title,$load_url,$finish_url,$state_url)
@@ -246,16 +178,25 @@ EOF;
 		{
 			$text = str_replace("<","&lt;",$text);
 			$text = str_replace(">","&gt;",$text);
-			$this->temp .= $this->col($col,'<div class="well"><pre>'.$text.'</pre></div>');
+			$this->temp .= $this->col($col,'<pre class="">'.$text.'</pre>');
 		}
 		/** CODE **/
 
+		/** CODE **/
+		function code_highlight($col,$text)
+		{
+			$text = str_replace("<","&lt;",$text);
+			$text = str_replace(">","&gt;",$text);
+			$this->temp .= $this->col($col,'<pre class="label-warning">'.$text.'</pre>');
+		}
+		/** CODE **/
+		
 		/** RCODE **/
 		function rcode($col,$text)
 		{
 			$text = str_replace("<","&lt;",$text);
 			$text = str_replace(">","&gt;",$text);
-			return $this->col($col,'<div class="well"><pre>'.$text.'</pre></div>');
+			return $this->col($col,'<pre>'.$text.'</pre>');
 		}
 		/** RCODE **/
 
@@ -280,7 +221,7 @@ EOF;
 		function progress($type,$percent)
 		{
 			$data = '
-			<div class="progress" style="margin: 0px; padding: 0px; max-height: 4px; height: 4px;">
+			<div class="progress" style="margin-top: 3px; max-height: 2px; height: 2px;">
 			    <div class="progress-bar progress-bar-'.$type.'" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$percent.'%"><span class="sr-only">'.$percent.'%</span>
 			    </div>
 			</div>';
@@ -498,15 +439,15 @@ EOF;
 				$tr = '<tr>[BODY]</tr>';	
 				$main = '
 			        <h2>[TITLE]</h2>
-			        <div class="table-responsive">
+			        <!--<div class="table-responsive">-->
 			        	[CSV_EXPORT]
-			            <table id="[ID]"class="table table-bordered table-hover table-striped">
+			            <table id="[ID]" class="table table-bordered table-hover table-striped">
 			   					[HEAD]
 			                <tbody>
 			                	[BODY]
 			                </tbody>
 			            </table>
-			        </div>';
+			        <!--</div>-->';
 
 			        if($csv_export)
 			        {
@@ -534,19 +475,20 @@ EOF;
 			    }
 
 				$body = "";
-				if(count($td))
+				if(!is_array($td))
 				{
-					while(list($k,$arr) = each($td))
-					{
-						$temp = "";
-						while(list($k2,$v) = each($arr))
-						{
-							$temp .= "<td style='text-align: center;'>".$v."</td>";
-						}
-						$body .= str_replace("[BODY]",$temp,$tr);
-					}
-	
+					$td = array();
 				}
+
+			    while(list($k,$arr) = each($td))
+			    {
+			    	$temp = "";
+				    while(list($k2,$v) = each($arr))
+				    {
+			    		$temp .= "<td style='text-align: center;'>".$v."</td>";
+			    	}
+			    	$body .= str_replace("[BODY]",$temp,$tr);
+			    }
 
 			    if($head)
 			    {
@@ -614,42 +556,6 @@ EOF;
 		}
 		/** RTABLE **/
 
-		/** PDF_TABLE **/
-		function pdf_table($th,$td)
-		{
-			$tr = '<tr>[BODY]</tr>';
-			
-			$main = '
-		            <table cellspacing="0" cellpadding="2" border="1">
-	                	[HEAD]
-	                	[BODY]
-		            </table>';
-
-		    $head = "";
-		    while(list($k,$v) = each($th))
-		    {
-		    	$head .= "<th align=\"center\">".$v."</th>";
-		    }
-
-		    $body = "";
-		    while(list($k,$arr) = each($td))
-		    {
-		    	$temp = "";
-			    while(list($k2,$v) = each($arr))
-			    {
-		    		$temp .= "<td align=\"center\">".$v."</td>";
-		    	}
-		    	$body .= str_replace("[BODY]",$temp,$tr);
-		    }
-		    $head = str_replace("[BODY]",$head,$tr);
-
-		    $main = str_replace("[HEAD]",$head,$main);
-		    $main = str_replace("[BODY]",$body,$main);
-
-		    return $main;
-		}
-		/** PDF_TABLE **/
-
 		/** TABLE **/
 		function table($col,$title,$th,$td,$id="",$order="",$csv_export = false)
 		{		    
@@ -661,7 +567,7 @@ EOF;
 		/** HIDDEN **/
 		function hidden($data)
 		{
-			return "<hidden>".$data."</hidden>";
+			return "<hidden class='hidden'>".$data."</hidden>";
 		}
 		/** HIDDEN **/
 
@@ -780,20 +686,6 @@ EOF;
 		/** CHECK_BUTTON **/
 
 
-		/** BUTTON **/
-		function kiosk_button($type,$text,$link,$confirm=NULL)
-		{
-			if($confirm)
-			{
-				return '<a href="'.$link.'" style="margin-left: 20px;" onclick="return confirm(\''.$confirm.'\');"><button style="font-size: 30px;" type="button" class="btn btn-lg btn-'.$type.'">'.$text.'</button></a>';
-			}
-			else
-			{
-				return '<a href="'.$link.'" style="margin-left: 20px;"><button style="font-size: 30px;" type="button" class="btn btn-lg btn-'.$type.'">'.$text.'</button></a>';
-			}
-		}
-		/** BUTTON **/
-
 		/** BADGE **/
 		function badge($text,$type="primary")
 		{
@@ -812,7 +704,7 @@ EOF;
 		/** BADGE **/
 		function tag($text,$type="primary")
 		{
-			return '<div style="text-align: center; margin: 5px;"><span class="label label-'.$type.'" style="font-size: 14px;">'.$text.'</span></div>';
+			return '<div style="text-align: center; margin: 5px;"><span class="label label-'.$type.'" style="font-size: 13px;">'.$text.'</span></div>';
 		}
 		/** BADGE **/
 
@@ -881,6 +773,23 @@ EOF;
         	$this->temp .= $this->col($col,$data);
 		}
 		/** BOX **/
+
+		/** BUBBLE **/
+		function bubble($col,$type,$title,$content)
+		{
+			$data = '
+			<div class="panel panel-'.$type.'">
+            <div class="panel-heading">
+                <h2 style="text-align: right; height: 5px; line-height: 5px; font-size: 12px;" class="panel-title">'.$title.'</h3>
+            </div>
+            <div class="panel-body">
+                '.$content.'
+            </div>
+        	</div>';
+
+        	$this->temp .= $this->col($col,$data);
+		}
+		/** BUBBLE **/
 
 		/** RBOX **/
 		function rbox($col,$type,$title,$content)
@@ -969,12 +878,38 @@ EOF;
 		/** FORM_SEP **/
 		function form_sep()
 		{
-			$this->form .= "<hr />";
+			$this->form .= "<div style='clear: both;'><hr /><div style='clear: both;'>";
 		}
 		/** FORM_SEP **/
 
+		/** INLINE_EDIT **/
+		function inline_edit($name,$value)
+		{
+			$value = str_replace("\"","'",$value);
+			$html = '<input READONLY style="background-color: transparent; border: 0px; cursor: text;" class="form-control" name="[NAME]" type="text" value="[VALUE]" />';
+			$html = str_replace("[NAME]",$name,$html);
+			$html = str_replace("[VALUE]",$value,$html);
+
+			return $html;
+		}
+		/** INLINE_EDIT **/
+
+		/** INLINE_TINYEDIT **/
+		function inline_tinyedit($name,$value)
+		{
+			$value = str_replace("\"","'",$value);
+			$html = '<input READONLY style="background-color: transparent; border: 0px; width: 90px; cursor: text;" class="form-control" name="[NAME]" type="text" value="[VALUE]" />';
+			$html = str_replace("[NAME]",$name,$html);
+			$html = str_replace("[VALUE]",$value,$html);
+
+			return $html;
+		}
+		/** INLINE_TINYEDIT **/
+
+
+
 		/** FORM_INPUT **/
-		function form_input($name,$type,$title,$help,$value)
+		function form_input($name,$type,$title,$help,$value,$psize=NULL)
 		{
 			if($type == "hidden")
 			{
@@ -985,8 +920,14 @@ EOF;
 				$hidden = "";
 			}
 
+			if($psize > 0)
+			{
+				$psize = (100 / $psize) - $psize;
+				$psize = "float: left; margin-right: 5px; width: ".$psize."%";
+			}
+
 			$data = '
-			<div class="form-group" style="'.$hidden.'">
+			<div class="form-group" style="'.$hidden." ".$psize.'">
                 <label>'.$title.'</label>
                 <input class="form-control" name="'.$name.'" type="'.$type.'" value="'.$value.'" />
                 <p class="help-block">'.$help.'</p>
@@ -996,6 +937,56 @@ EOF;
 			$this->form .= $data;
 		}
 		/** FORM_INPUT **/
+
+
+		/** FORM_TEXT **/
+		function form_text($name,$title,$help,$value)
+		{
+			$data = '
+			<div class="form-group" style="'.$hidden.'">
+				<label>'.$title.'</label>
+				<textarea class="form-control" style="width: 100%; height: 80px;" name='.$name.' >'.htmlspecialchars($value).'</textarea>
+                <p class="help-block">'.$help.'</p>
+            </div>
+            ';
+
+			$this->form .= $data;
+		}
+		/** FORM_TEXT **/
+
+		/** FORM_DATE **/
+		function form_date($name,$title,$help,$value)
+		{
+			$id = "datepick_hash_".md5($name);
+			$date = strtotime($value);
+			$date = date("Y/m/d",$date);
+
+			$data = '
+			<div class="form-group" style="'.$hidden.'">
+				<label>'.$title.'</label>
+				<input class="form-control" name="'.$name.'" id="'.$id.'" data-toggle="'.$id.'" />
+				<script>
+				$(function () {
+					$("#'.$id.'").datepicker({format: \'yyyy-mm-dd\'});
+					$("#'.$id.'").datepicker(\'setDate\',\''.$date.'\');
+					
+				});
+				</script>
+                <p class="help-block">'.$help.'</p>
+            </div>
+            ';
+
+			$this->form .= $data;
+		}
+		/** FORM_DATE **/
+
+		/** DROPZONE **/
+		function dropzone($col,$ID,$action)
+		{
+			$this->temp .= $this->col($col,'<form action="'.$action.'" class="dropzone"></form>');
+		}
+		/** FORM_TEXT **/
+		
 
 		/** FORM_LABEL **/
 		function form_label($title,$help,$value)
@@ -1014,17 +1005,24 @@ EOF;
 
 
 		/** FORM_AUTOCOMPLETE **/
-		function form_autocomplete($name,$cb,$title,$help,$value)
+		function form_autocomplete($name,$cb,$title,$help,$value,$psize=NULL)
 		{
+
+			if($psize > 0)
+			{
+				$psize = (100 / $psize) - $psize;
+				$psize = "float: left; margin-right: 5px; width: ".$psize."%";
+			}
+			
 			$hash = "H".md5("ac_".$name.$cb);
 			$data = '
-			<div class="form-group" style="'.$hidden.'">
+			<div class="form-group" style="'.$hidden." ".$psize.'">
                 <label>'.$title.'</label>
-                <input id="'.$hash.'" class="form-control" name="'.$name.'" type="'.$type.'" value="'.$value.'" />
+                <input id="'.$hash.'" class="form-control" name="'.$name.'" type="text" value="'.$value.'" />
                 <p class="help-block">'.$help.'</p>
             </div>
 
-            <script>
+			<script>
 				var options = {
 					url: "?ac='.$cb.'",
 
@@ -1037,7 +1035,9 @@ EOF;
 					}
 				};
 
-				$("#'.$hash.'").easyAutocomplete(options);
+				$( document ).ready(function() {
+					$("#'.$hash.'").easyAutocomplete(options);
+				});				
 
             </script>
             ';
@@ -1045,6 +1045,8 @@ EOF;
 			$this->form .= $data;
 		}
 		/** FORM_AUTOCOMPLETE **/
+
+
 
 		/** CODE39 **/
 		function form_code39($text,$help)
@@ -1066,8 +1068,8 @@ EOF;
 		}
 		/** CODE39 **/
 
-		/** FORM_CHECKBOX **/
-		function form_checkbox($name,$title,$checked)
+		/** ONOFF **/
+		function onoff($name,$title,$checked)
 		{
 			if($checked)
 			{
@@ -1095,6 +1097,41 @@ EOF;
 				</tr>
 			</table>
             ';
+			return $data;
+		}
+		/** ONOFF **/
+		
+		/** FORM_CHECKBOX **/
+		function form_checkbox($name,$title,$checked,$psize=NULL)
+		{
+			if($checked)
+			{
+				$checked = "CHECKED='checked'";
+				$active = "active";
+			}
+			else
+			{
+				$checked = "";
+				$active = "";
+			}
+
+			$hash = md5($name.$title.$checked);
+
+			if($psize > 0)
+			{
+				$psize = (100 / $psize) - $psize;
+				$psize = "margin-top: 25px; float: left; margin-right: 5px; width: ".$psize."%";
+			}
+			
+
+			$data = '
+	        <div data-toggle="buttons" style="'.$psize.'">
+				<label class="button-checkbox btn btn-default btn-block '.$active.'" for="'.$hash.'">
+					<input type="checkbox" autocomplete="off" name="'.$name.'" id="'.$hash.'" '.$checked.'> '.$title.'
+				</label>
+			</div>
+            ';
+
 			$this->form .= $data;
 		}
 		/** FORM_CHECKBOX **/
@@ -1115,10 +1152,17 @@ EOF;
 		/** FORM_COLOR **/
 
 		/** FORM_SELECT **/
-		function form_select($name,$title,$help,$arr,$selected)
+		function form_select($name,$title,$help,$arr,$selected,$psize=NULL)
 		{
+
+			if($psize > 0)
+			{
+				$psize = (100 / $psize) - $psize;
+				$psize = "float: left; margin-right: 5px; width: ".$psize."%";
+			}
+			
 			$data = '
-			<div class="form-group">
+			<div class="form-group" style="'.$psize.'">
                 <label>[TITLE]</label>
                 <select name="[NAME]" class="form-control">
                 [OPTION]
@@ -1132,7 +1176,12 @@ EOF;
             $data = str_replace("[TITLE]",$title,$data);
             $data = str_replace("[HELP]",$help,$data);
 
-            $opts = "";
+			
+			$opts = "";
+			if(!is_array($arr))
+			{
+				$arr = array();
+			}
             while(list($k,$v) = each($arr))
             {
             	$temp = $option;
@@ -1154,53 +1203,53 @@ EOF;
 
 			$this->form .= $data;
 		}
-		/** FORM_INPUT **/
+		/** FORM_SELECT **/
 
-		/** CHART **/
-		function chart($col,$url,$shadow,$ID="")
+		/** ICON **/
+		function icon($icon,$url)
 		{
-			$data = $this->col($col,'<img style="cursor: pointer; margin-bottom: 30px;" class="chart_autosize chart_shadow_'.strtolower($shadow).'" onclick="chart_preview(\''.$url.'\',\''.$ID.'\');" data-src="'.$url.'"></img>');
-			$this->temp .= $data;
-		}
-		/** CHART **/
-
-		/** CHART_FULL **/
-		function chart_full($col,$url)
-		{
-$data = <<<EOF
-			<div style="position: relative;">
-				<img style="position: absolute; z-index: 0; left: 40%; margin-left: -64px; top: 80px;" id="chart_image_full_preload" src="/admin_html/images/ripple.svg" />
-				<img id="chart_image_full" style="z-index: 5; position: absolute; cursor: pointer; margin-bottom: 30px;" src="[URL]" class="pChartPicture"></img>
-			</div>
-			
-			<script>
-			$( document ).ready(function() 
-				{ 
-					addImage("chart_image_full","pictureMap","[URL]" + "&getimagemap=true"); 
-				});
-			</script>
-EOF;
-			$data = str_replace("[URL]",$url,$data);
-			$data = $this->col($col,$data);
-			$this->temp .= $data;
-		}
-		/** CHART_FULL **/
-
-		/** CHART_PREVIEW **/
-		function chart_preview($url,$icon,$ID="")
-		{
-			$data = '<div style="cursor: pointer; float: left; margin-left: 5px; margin-right: 5px;" onclick="chart_preview(\''.$url.'\',\''.$ID.'\');" class="fa fa-'.$icon.' fa-2x"></div>';
+			$data = '<div style="cursor: pointer; margin-right: 5px;" onclick="self.location.href=\''.$url.'\';" class="fa fa-'.$icon.'"></div>';
 			return $data;
 		}
-		/** CHART_PREVIEW **/
+		/** ICON **/
 
 		/** INLINE_FORM **/
 		function inline_form($url,$icon)
 		{
-			$data = '<div style="cursor: pointer; float: left; margin-left: 5px; margin-right: 5px;" onclick="inline_form(\''.$url.'\');" class="fa fa-'.$icon.' fa-2x"></div>';
+			$data = '<div style="cursor: pointer; float: left; margin-left: 5px; margin-right: 5px;" onclick="inline_form(\''.$url.'\');" class="fa fa-'.$icon.' fa-lg"></div>';
 			return $data;
 		}
 		/** INLINE_FORM **/
+
+		/** INLINE_BUTTON **/
+		function inline_button($link,$icon,$confirm)
+		{
+			if($confirm)
+			{
+				return '<a href="'.$link.'" style="margin-left: 20px;" onclick="return confirm(\''.$confirm.'\');"><div style="cursor: pointer; color: #C9302C; float: left; margin-left: 5px; margin-right: 5px;" class="fa fa-'.$icon.' fa-lg"></div></a>';				
+			}
+			else
+			{
+				return '<a href="'.$link.'" style="margin-left: 20px;"><div style="cursor: pointer; float: left; margin-left: 5px; margin-right: 5px;" class="fa fa-'.$icon.' fa-lg"></div></a>';				
+			}
+		}
+		/** INLINE_BUTTON **/
+
+		/** INLINE_BUTTON_LEGACY **/
+		function inline_button_legacy($link,$type,$icon,$text,$confirm)
+		{
+			//<button type="button" class="btn btn-sm btn-'.$type.'">'.$text.'</button></a>';
+			if($confirm)
+			{
+				return '<a onclick="inline_form(\''.$link.'\');" class="btn btn-sm btn-'.$type.'" onclick="return confirm(\''.$confirm.'\');"><i class="fa fa-'.$icon.' fa-lg"></i> '.$text.'</a>';
+			}
+			else
+			{
+				return '<a onclick="inline_form(\''.$link.'\');" class="btn btn-sm btn-'.$type.'"><i class="fa fa-'.$icon.' fa-lg"></i> '.$text.'</a>';
+			}
+		}
+		/** INLINE_BUTTON_LEGACY **/
+		
 
 		/** TERMINAL **/
 		function terminal($url,$text)
@@ -1262,498 +1311,13 @@ EOF;
 		}
 		/** IMAGE_SELECT **/
 
-		/** KIOSK_PLIST **/
-		function kiosk_plist($arr)
-		{
-			$num = 1;
-			$data = '<table border="0" style="width: 100%;">';
-
-			ksort($arr);
-
-			/** DISPLAY_ASSIGNED **/
-			while(list($sorting,$prearr) = each($arr))
-			{
-				while(list($SN,$_arr) = each($prearr))
-				{
-					$fs = false;
-					while(list($k,$v) = each($_arr))
-					{
-						if(!$v["assigned"])
-						{
-							continue;
-						}
-
-						if(!$fs)
-						{
-							$data .= '<tr><td colspan="99" style="border: 0px;"><div style="min-height: 40px;"><img style="float: left; margin-right: 20px;" src="/admin_html/images/help.png" width="40"/><h1>'.$SN.'</h1></div></td></tr>';
-							$fs = true;
-						}
-
-						$col = $num % 2;
-						if($v["wait"])
-						{
-							$data .= '<tr class="kiosk_item" style="background-color: #888;">';
-						}
-						else
-						{
-							$data .= '<tr onclick="self.location.href=\''.$v["url"].'\';" class="kiosk_item kiosk_col_'.$col.'">';
-						}
-
-						$data .= '<td align="left" style="border: 1px solid #ccc;" ><div style="min-height: 100px;"></div></td>';
-						$data .= '<td align="left" style="border: 1px solid #ccc; min-width: 350px; padding-right: 20px;" ><div style="float: left; margin-right: 10px; width: 30px; height: 100px; background-color: '.$v["action_color"].';"></div><h2 style="line-height: 70px;">'.$v["action"].'</h2></td>';
-						$data .= '<td align="left" style="border: 1px solid #ccc;" width="100%"><h2>'.$v["name"].'</h2></td>';
-						$data .= '<td align="left" style="border: 1px solid #ccc; min-width: 300px;"><h2>'.$v["qty"].'</h2></td>';				
-						$data .= "</tr>";					
-
-						$num++;
-					}
-
-					if($fs)
-					{
-						$data .= '<tr><td colspan="99" style="border: 0px;"><div style="min-height: 40px;"></div></td></tr>';
-					}
-				}
-			}
-			/** DISPLAY_ASSIGNED **/
-
-			/** DISPLAY_NON_ASSIGNED **/
-			reset($arr);
-			while(list($sorting,$prearr) = each($arr))
-			{
-				while(list($SN,$_arr) = each($prearr))
-				{
-					$fs = false;
-					while(list($k,$v) = each($_arr))
-					{
-						if($v["assigned"])
-						{
-							continue;
-						}
-
-						if(!$fs)
-						{
-							$data .= '<tr><td colspan="99" style="border: 0px;"><div style="min-height: 40px;"><h1>'.$SN.'</h1></div></td></tr>';
-							$fs = true;
-						}
-
-						$col = $num % 2;
-						if($v["wait"])
-						{
-							$data .= '<tr class="kiosk_item" style="background-color: #888;">';
-						}
-						else
-						{
-							$data .= '<tr onclick="self.location.href=\''.$v["url"].'\';" class="kiosk_item kiosk_col_'.$col.'">';
-						}
-
-						$data .= '<td align="left" style="border: 1px solid #ccc;" ><div style="min-height: 100px;"></div></td>';
-						$data .= '<td align="left" style="border: 1px solid #ccc; min-width: 350px; padding-right: 20px;" ><div style="float: left; margin-right: 10px; width: 30px; height: 100px; background-color: '.$v["action_color"].';"></div><h2 style="line-height: 70px;">'.$v["action"].'</h2></td>';
-						$data .= '<td align="left" style="border: 1px solid #ccc;" width="100%"><h2>'.$v["name"].'</h2></td>';
-						$data .= '<td align="left" style="border: 1px solid #ccc; min-width: 300px;"><h2>'.$v["qty"].'</h2></td>';				
-						$data .= "</tr>";					
-
-						$num++;
-					}
-
-					if($fs)
-					{
-						$data .= '<tr><td colspan="99" style="border: 0px;"><div style="min-height: 40px;"></div></td></tr>';
-					}
-				}
-			}
-			/** DISPLAY_NON_ASSIGNED **/
-
-			$data .= "</table>";
-
-			$this->temp .= $this->col(12,$data);
-		}		
-		/** KIOSK_PLIST **/
-
-		/** KIOSK_CLIST **/
-		function kiosk_clist($arr)
-		{
-			$num = 1;
-			$data = '<table border="0" style="width: 100%;">';
-			while(list($k,$v) = each($arr))
-			{
-				if($v == "sep")
-				{
-					$data .= '<tr><td colspan="99" style="border: 0px;"><div style="min-height: 40px;"></div></td></tr>';
-					continue;
-				}
-				$col = $num % 2;
-				$data .= '<tr onclick="self.location.href=\''.$v["url"].'\';" class="kiosk_item kiosk_col_'.$col.'">';
-				$data .= '<td align="left" style="border: 1px solid #ccc;" ><div style="min-height: 100px;"></div></td>';
-				$data .= '<td align="left" style="border: 1px solid #ccc; padding-left: 10px; padding-right: 20px;" width="100%" ><h2>'.$v["name"].' ('.$v["max_items"].') </h2></td>';
-				$data .= "</tr>";
-				$num++;
-			}
-
-			$data .= "</table>";
-
-			$this->temp .= $this->col(12,$data);
-		}		
-		/** KIOSK_CLIST **/
-
-		/** KIOSK_MLIST **/
-		function kiosk_mlist($arr)
-		{
-			$num = 1;
-			$data = '<table border="0" style="width: 100%;">';
-			while(list($k,$v) = each($arr))
-			{
-				if($v == "sep")
-				{
-					$data .= '<tr><td colspan="99" style="border: 0px;"><div style="min-height: 40px;"></div></td></tr>';
-					continue;
-				}
-				$col = $num % 2;
-				$data .= '<tr onclick="self.location.href=\''.$v["url"].'\';" class="kiosk_item kiosk_col_'.$col.'">';
-				$data .= '<td align="left" style="border: 1px solid #ccc;" ><div style="min-height: 100px;"></div></td>';
-				$data .= '<td align="left" style="border: 1px solid #ccc; padding-left: 10px; padding-right: 20px;" width="100%" ><h2>'.$v["name"].'</h2></td>';
-				$data .= "</tr>";
-				$num++;
-			}
-
-			$data .= "</table>";
-
-			$this->temp .= $this->col(12,$data);
-		}		
-		/** KIOSK_MLIST **/
-
-		/** KIOSK_TITLE **/
-		function kiosk_title($title,$url,$nav = NULL,$active_nav = NULL)
-		{
-			$data = '<table border="0" style="width: 100%;">';
-
-			$data .= "<tr>";
-			$data .= '<td align="center" style="width: 100px;"><a href="'.$url.'" align="center"><img src="/admin_html/images/back.png" width="96" /></a></td>';
-			$data .= '<td align="left" valign="middle"><h1>'.$title.'</h1></td>';
-			if(is_array($nav))
-			{
-				$_nav = "";
-				reset($nav);
-				while(list($k,$v) = each($nav))
-				{
-					if($k == $active_nav)
-					{
-						$_nav .= '<div class="kiosk_tab kiosk_tab_active">'.$k.'</div>';
-					}
-					else
-					{
-						$_nav .= '<a href="'.$v.'"><div class="kiosk_tab">'.$k.'</div></a>';
-					}
-				}
-				$data .= '<td align="left" valign="middle">'.$_nav.'</td>';
-			}
-			$data .= "</tr>";
-			$data .= "</table><hr />";
-			$this->temp .= $this->col(12,$data);
-		}
-		/** KIOSK_TITLE **/
-
-		/** KIOSK_REPORT **/
-		function kiosk_report($inital)
-		{
-			$tdata = '
-			<form method="POST">
-				<table border="0">
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/success.png" /></td>
-						<td><input id="kiosk_report_success" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="success" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[SUCCESS_DESC]</h3></td>
-					</tr>
-
-					<tr>
-						<td colspan="2"><div style="height: 20px;"></div></td>
-					</tr>
-
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/failed.png" /></td>
-						<td><input id="kiosk_report_failed" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="failed" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[FAILED_DESC]</h3></td>
-					</tr>
-
-					<tr>
-						<td colspan="2"><div style="height: 20px;"></div></td>
-					</tr>
-
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/time.png" /></td>
-						<td><input id="kiosk_report_time" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="time" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[TIME_DESC]</h3></td>
-					</tr>
-				</table>
-			</form>
-
-			<script>
-				var lfinal = false;
-				function kiosk_report(final)
-				{
-					if(final == true)
-					{
-						if(lfinal == true)
-						{
-							return 0;
-						}
-						else
-						{
-							lfinal = true;
-						}
-					}
-					else
-					{
-						lfinal = false;
-					}
-
-					var arg = "?kiosk_cb=" + $("#kiosk_report_success").val() + "," + $("#kiosk_report_failed").val() + "," + $("#kiosk_report_time").val();
-					$("#kiosk_summary").load(arg);
-				}
-				
-				$( document ).ready(function() {
-    				kiosk_report();
-				});
-			</script>
-			';
-
-			$tdata = str_replace("[FAILED_DESC]",L("KIOSK_FAILED_DESC"),$tdata);
-			$tdata = str_replace("[SUCCESS_DESC]",L("KIOSK_SUCCESS_DESC"),$tdata);
-			$tdata = str_replace("[TIME_DESC]",L("KIOSK_TIME_DESC"),$tdata);
-
-			$this->temp .= $this->col(4,$this->rbox(12,"primary",L("KIOSK_REPORT"),$tdata));
-			$this->temp .= $this->col(5,"<div id='kiosk_summary' onmouseover='kiosk_report(true);'>".$initial."</div>");
-
-		}
-		/** KIOSK_REPORT **/
-
-		/** KIOSK_REPORT_TIME **/
-		function kiosk_report_time($inital)
-		{
-			$tdata = '
-			<form method="POST">
-				<table border="0">
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/time.png" /></td>
-						<td><input id="kiosk_report_time" placeholder="0" min="0" onchange="kiosk_report(true);" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="time" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[TIME_DESC]</h3></td>
-					</tr>
-				</table>
-			</form>
-
-			<script>
-				var lfinal = false;
-				function kiosk_report(final)
-				{
-					if(final == true)
-					{
-						if(lfinal == true)
-						{
-							return 0;
-						}
-						else
-						{
-							lfinal = true;
-						}
-
-					}
-					else
-					{
-						lfinal = false;
-					}
-
-					var arg = "?kiosk_cb=" + $("#kiosk_report_time").val();
-					$("#kiosk_summary").load(arg);
-				}
-				
-				$( document ).ready(function() {
-    				kiosk_report();
-				});
-			</script>
-			';
-
-			$tdata = str_replace("[TIME_DESC]",L("KIOSK_TIME_DESC"),$tdata);
-
-			$this->temp .= $this->col(4,$this->rbox(12,"primary",L("KIOSK_REPORT"),$tdata));
-			$this->temp .= $this->col(5,"<div id='kiosk_summary' onmouseover='kiosk_report(true);'>".$initial."</div>");
-
-		}
-		/** KIOSK_REPORT_TIME **/
-
-		/** KIOSK_REPORT_SHIFT **/
-		function kiosk_report_shift($inital)
-		{
-			$tdata = '
-			<form method="POST">
-				<table border="0">
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/time.png" /></td>
-						<td><input id="kiosk_report_shift_time" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="time" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[SHIFT_TIME]</h3></td>
-					</tr>
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/coffe.png" /></td>
-						<td><input id="kiosk_report_shift_overtime" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="time" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[SHIFT_OVERTIME]</h3></td>
-					</tr>
-				</table>
-			</form>
-
-			<script>
-				var lfinal = false;
-				function kiosk_report(final)
-				{
-					if(final == true)
-					{
-						if(lfinal == true)
-						{
-							return 0;
-						}
-						else
-						{
-							lfinal = true;
-						}
-
-					}
-					else
-					{
-						lfinal = false;
-					}
-
-					var arg = "?kiosk_cb=" + $("#kiosk_report_shift_time").val() + "," + $("#kiosk_report_shift_overtime").val();
-					$("#kiosk_summary").load(arg);
-				}
-				
-				$( document ).ready(function() {
-    				kiosk_report();
-				});
-			</script>
-			';
-
-			$tdata = str_replace("[SHIFT_TIME]",L("SHIFT_TIME"),$tdata);
-			$tdata = str_replace("[SHIFT_OVERTIME]",L("SHIFT_OVERTIME"),$tdata);
-
-			$this->temp .= $this->col(4,$this->rbox(12,"primary",L("KIOSK_REPORT"),$tdata));
-			$this->temp .= $this->col(5,"<div id='kiosk_summary' onmouseover='kiosk_report(true);'>".$initial."</div>");
-
-		}
-		/** KIOSK_REPORT_SHIFT **/
-
-
-		/** KIOSK_REPORT2 **/
-		function kiosk_report2($inital)
-		{
-			$tdata = '
-			<form method="POST">
-				<table border="0">
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/success.png" /></td>
-						<td><input id="kiosk_report_success" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="success" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[KIOSK_PACK_DESC]</h3></td>
-					</tr>
-
-					<tr>
-						<td colspan="2"><div style="height: 20px;"></div></td>
-					</tr>
-
-					<tr>
-						<td style="min-width: 150px;"><img width="96" src="/admin_html/images/time.png" /></td>
-						<td><input id="kiosk_report_time" placeholder="0" min="0" onchange="kiosk_report();" onkeyup="kiosk_report();" type="number" style="font-size: 50px; width: 200px;" name="time" value="" /></td>
-					</tr>
-					<tr>
-						<td></td><td><h3>[TIME_DESC]</h3></td>
-					</tr>
-				</table>
-			</form>
-
-			<script>
-				var lfinal = false;
-				function kiosk_report(final)
-				{
-					if(final == true)
-					{
-						if(lfinal == true)
-						{
-							return 0;
-						}
-						else
-						{
-							lfinal = true;
-						}
-
-					}
-					else
-					{
-						lfinal = false;
-					}
-					var arg = "?kiosk_cb=" + $("#kiosk_report_success").val() + "," + $("#kiosk_report_time").val();
-					$("#kiosk_summary").load(arg);
-				}
-				
-				$( document ).ready(function() {
-    				kiosk_report();
-				});
-			</script>
-			';
-
-			$tdata = str_replace("[KIOSK_PACK_DESC]",L("KIOSK_PACK_DESC"),$tdata);
-			$tdata = str_replace("[TIME_DESC]",L("KIOSK_TIME_DESC"),$tdata);
-
-			$this->temp .= $this->col(4,$this->rbox(12,"primary",L("KIOSK_REPORT"),$tdata));
-			$this->temp .= $this->col(5,"<div id='kiosk_summary' onmouseover='kiosk_report(true);'>".$initial."</div>");
-
-		}
-		/** KIOSK_REPORT2 **/
-
-		/** KIOSK_INFO **/
-		function kiosk_info($col,$title,$image)
-		{
-			$data = '<table border="0" style="width: 100%;">';
-			$data .= "<tr>";
-			$data .= '<td align="center" style="width: 100px;"><img src="/admin_html/images/'.$image.'" width="96" /></td>';
-			$data .= '<td align="left" valign="middle"><h1 style="margin-left: 20px;">'.$title.'</h1></td>';
-			$data .= "</tr>";
-			$data .= "</table>";
-			$data .= '<div style="min-height: 20px;"></div>';
-			$this->temp .= $this->col($col,$data);
-		}
-		/** KIOSK_INFO **/		
-
-		/** KIOSK_INFO **/
-		function kiosk_small($col,$title,$image)
-		{
-			$data = '<table border="0" style="width: 100%;">';
-			$data .= "<tr>";
-			$data .= '<td align="center" style="width: 70px;"><img src="/admin_html/images/'.$image.'" width="64" /></td>';
-			$data .= '<td align="left" valign="middle"><h3 style="margin-left: 20px;">'.$title.'</h3></td>';
-			$data .= "</tr>";
-			$data .= "</table>";
-			$data .= '<div style="min-height: 20px;"></div>';
-			$this->temp .= $this->col($col,$data);
-		}
-		/** KIOSK_INFO **/		
-
-
 		/** IMAGE_SELECT_SINGLE **/
 		function image_select_single($col,$name1,$title1,$url1)
 		{
 			$data = '<table border="0" style="width: 100%;">';
 
 			$data .= "<tr>";
-			$data .= '<td align="center"><a href="'.$url1.'" align="center"><img src="/admin_html/images/'.$name1.'" /></a></td>';
+			$data .= '<td align="center"><a href="'.$url1.'" align="center"><img style="max-height: 256px; padding: 20px;" src="/admin_html/images/'.$name1.'" /></a></td>';
 			$data .= "</tr>";
 
 			$data .= "<tr>";
@@ -1775,7 +1339,7 @@ EOF;
 		/** INLINE_FORM_BUTTON **/
 
 		/** FORM **/
-		function form($col,$type,$title,$submit=NULL,$cancel=NULL)
+		function form($col,$type,$title,$submit=NULL,$cancel=NULL,$cancel_text=NULL)
 		{
 			if(!$submit)
 			{
@@ -1783,10 +1347,16 @@ EOF;
 			}
 
 			$this->form_submit($type,$submit);
-			if($cancel)
+			if($cancel && $cancel_text)
+			{
+				$this->form .= $this->button("info",$cancel_text,$cancel);
+			}
+			else if($cancel)
 			{
 				$this->form .= $this->button("info",L("CANCEL"),$cancel);
 			}
+
+
 
 			$form_data = $this->form;
 			$this->form = "";

@@ -32,12 +32,17 @@
         while(list($k,$v) = each($tmp))
         {
             $var = explode("=",$v,2);
+            if(!isset($var[0]) || !isset($var[1]))
+            {
+                continue;
+            }
+
             $var[0] = trim($var[0]);
             $var[1] = trim($var[1]);
             $arr[$var[0]] = $var[1];
         }
-
-        if($arr["sasl_username"])
+/* CAUSE PROBLEM
+        if(isset($arr["sasl_username"]) && $arr["sasl_username"])
         {
             $arr["real_sender"] = $arr["sasl_username"];            
         }
@@ -45,6 +50,7 @@
         {
             $arr["real_sender"]  = $arr["sender"];
         }
+*/
 
         /** utc=utc@domain.ex **/
         /** SOME MAKEUP **/
@@ -61,6 +67,8 @@
             }
         }
 
+        $arr["real_sender"]  = $arr["sender"];
+        
         if(strstr($arr["recipient"],"="))
         {
             $tmp = explode("=",$arr["recipient"]);
@@ -74,8 +82,6 @@
             }
         }
         /** SOME MAKEUP **/
-
-
         /** PARSE INPUT **/
         
 
@@ -86,7 +92,7 @@
             server_port == 10025 when it came from postfix MTA
         **/
 
-        if(trim($arr["sasl_username"]) != "" || trim($arr["exim_auth"]) != "" || $arr["server_port"] == "10025")
+        if((isset($arr["sasl_username"]) && trim($arr["sasl_username"]) != "") || (isset($arr["exim_auth"]) && trim($arr["exim_auth"]) != "") || (isset($arr["server_port"]) && $arr["server_port"] == "10025"))
         {
             /** LIMIT OUTGOING MESSAGES **/
             $msg = NULL;

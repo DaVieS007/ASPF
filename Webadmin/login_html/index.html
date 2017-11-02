@@ -1,97 +1,80 @@
-<!DOCTYPE html>
-<html lang="{!LANG:PREFIX}">
-
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{!LANG:TITLE}</title>
-        {!HTML:META}
+﻿<html lang="{!LANG:PREFIX}">
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-US">  <!--<![endif]-->
+<head>	
+    <title>{!LANG:TITLE}</title>
+    {!HTML:META}
     
-        <!-- CSS -->
-        <link rel="stylesheet" href="/login_html/assets/bootstrap/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/login_html/assets/font-awesome/css/font-awesome.min.css">
-		<link rel="stylesheet" href="/login_html/assets/css/form-elements.css">
-        <link rel="stylesheet" href="/login_html/assets/css/style.css">
+<link rel="stylesheet" href="/login_html/css/style.css" >
 
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
+<!-- FAVICONS -->
+<link rel="shortcut icon" href="/favicon.ico">
 
-        <!-- Favicon and touch icons -->
-        <link rel="shortcut icon" href="/login_html/assets/ico/favicon.png">
-        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/login_html/assets/ico/apple-touch-icon-144-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/login_html/assets/ico/apple-touch-icon-114-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/login_html/assets/ico/apple-touch-icon-72-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" href="/login_html/assets/ico/apple-touch-icon-57-precomposed.png">
-
-    </head>
-
-    <body>
-
-        <!-- Top content -->
-        <div class="top-content">
-        	
-            <div class="inner-bg">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-sm-8 col-sm-offset-2 text">
-                            <h1><strong>{!LANG:WELCOME}</strong> <b>{!LANG:PRODUCT}</b> {!LANG:PRODUCT2}</h1>
-                            <div class="description">
-                            	<p>
-	                            	
-                            	</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6 col-sm-offset-3 form-box">
-                        	<div class="form-top">
-                        		<div class="form-top-left">
-                        			<h3>{!LANG:LOGIN_DESC}</h3>
-                                    <p>{!LANG:LOGIN_DESC2}</p>
-                                    <div id="response" style="color: red;"></div>
-                        		</div>
-                        		<div class="form-top-right">
-                        			<i class="fa fa-lock"></i>
-                        		</div>
-                            </div>
-                            <div class="form-bottom">
-			                    <form role="form" action="" method="post" class="login-form">
-			                        <div class="form-group">
-			                        	<label class="sr-only" for="form-password">Password</label>
-			                        	<input type="password" name="form-password" id="passwd" placeholder="{!LANG:PASSWD}" class="form-password form-control" id="form-password">
-			                        </div>
-			                        <button type="submit" class="btn">{!LANG:LOGIN_BUTTON}</button>
-			                    </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-
-
-        <!-- Javascript -->
-        <script>
-            var BASE_URI = "/{!LANG:PREFIX}/login/";
-        </script>
-
-        <script src="/login_html/assets/js/jquery-1.11.1.min.js"></script>
-        <script src="/login_html/assets/bootstrap/js/bootstrap.min.js"></script>
-        <script src="/login_html/assets/js/jquery.backstretch.min.js"></script>
-        <script src="/login_html/assets/js/scripts.js?v3"></script>
-
+</head>
+<body>
+    
+    <!--<div style="color: black; font-family: Arial; font-size: 70px; font-weight: bold; margin: 20px;">ASPF</div>-->
+                            
+    <div id="form">
         
-        
-        <!--[if lt IE 10]>
-            <script src="assets/js/placeholder.js"></script>
-        <![endif]-->
+        <table border="0" style="min-width: 1100px;">
+            <tr>
+                <td colspan="2">
+                    <h2>{!LANG:WELCOME} <b>{!LANG:PRODUCT}</b> {!LANG:PRODUCT2}</h2>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="innerform">
+                        <form action="" method="POST" id="">
+                            <input type="password" id="passwd" name="passwd" placeholder="{!LANG:ENTER_PASSWORD}"/>
+                            <br />
+                            <input type="button" value="{!LANG:LOGIN_BUTTON}" onclick="login();" />
+                        </form>         
+                    </div>
+                </td>
+                <td>
+                    <div id="login_help">
+                        <h4>{!LANG:LOGIN_DESC}</h4>
+                        <div id="response"></div>
+                    </div>
+                </td>                
+            </tr>
+        </table>
+    </div>
 
-    </body>
 
+    <script>
+
+    document.addEventListener("keydown", function (e) {
+        if (e.keyCode === 13) {  //checks whether the pressed key is "Enter"
+            login();
+            e.preventDefault();
+        }
+    });
+
+    function login()
+    {
+        if($('#passwd').val() != "")
+        {
+            $('#response').load('/{!LANG:PREFIX}/login/' + $('#passwd').val() + '/login', 
+                function() { 
+                    $('#passwd').val('');
+                });            
+        }
+    }
+    </script>
+
+
+    <script>
+    if(CB != undefined)
+    {
+        CB.token('');
+    }
+    </script>
+
+    <!-- JS -->
+    <script type="text/javascript" src="/login_html/js/jquery.js"></script>
+</body>
 </html>

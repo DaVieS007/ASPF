@@ -27,6 +27,13 @@ $L["mail_limit"] = "Mail Limit";
 $L["domain_limit"] = "Domain Limit";
 $L["sender_domain"] = "Sender Domain";
 
+$L["custom_levels"] = "Custom Levels";
+$L["clevel_help"] = "Custom SPAM filtering settings domain or address based";
+$L["clevel_mails"] = "Mail Based Custom Filtering Levels";
+$L["clevel_domains"] = "Domain Based Custom Filtering Levels";
+$L["clevel"] = "Filtering Level";
+$L["domain"] = "Domain";
+
 $L["limits"] = "Sending Limits";
 
 $L["404_not_found"] = "404 The page that you requested is not found";

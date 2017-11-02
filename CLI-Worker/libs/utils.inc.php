@@ -405,7 +405,6 @@
         /** PROCESS **/
 
         /** CLEANUP **/
-        
         reset($socket4);
         while(list($ip,$sock) = each($socket4))
         {
@@ -460,15 +459,15 @@
         $row = $DB->query("SELECT * FROM domains WHERE domain = '".$DB->escape($domain)."'")->fetch_array();
         if($row["ID"])
         {
-            if($row["type"] != "blacklist" && $row["type"] != "whitelist")
+            if($row["type"] != "blacklist" && $row["type"] != "whitelist" && $row["type"] != "auto-whitelist")
             {
-                $DB->query("UPDATE domains SET type = 'whitelist', expire = '".$cache_until."' WHERE ID = '".$row["ID"]."'");
+                $DB->query("UPDATE domains SET type = 'auto-whitelist', expire = '".$cache_until."' WHERE ID = '".$row["ID"]."'");
                 return true;
             }
         }
         else
         {
-            $DB->query("INSERT INTO domains (domain,`type`,expire) VALUES ('".$DB->escape($domain)."','whitelist','".$cache_until."');");
+            $DB->query("INSERT INTO domains (domain,`type`,expire) VALUES ('".$DB->escape($domain)."','auto-whitelist','".$cache_until."');");
             return true;
         }
         return false;
@@ -484,15 +483,15 @@
         $row = $DB->query("SELECT * FROM senders WHERE address = '".$DB->escape($mail)."'")->fetch_array();
         if($row["ID"])
         {
-            if($row["type"] != "blacklist" && $row["type"] != "whitelist")
+            if($row["type"] != "blacklist" && $row["type"] != "whitelist" && $row["type"] != "auto-whitelist")
             {
-                $DB->query("UPDATE senders SET type = 'whitelist', expire = '".$cache_until."' WHERE ID = '".$row["ID"]."'");
+                $DB->query("UPDATE senders SET type = 'auto-whitelist', expire = '".$cache_until."' WHERE ID = '".$row["ID"]."'");
                 return true;
             }
         }
         else
         {
-            $DB->query("INSERT INTO senders (address,`type`,expire) VALUES ('".$DB->escape($mail)."','whitelist','".$cache_until."');");
+            $DB->query("INSERT INTO senders (address,`type`,expire) VALUES ('".$DB->escape($mail)."','auto-whitelist','".$cache_until."');");
             return true;
         }
         return false;

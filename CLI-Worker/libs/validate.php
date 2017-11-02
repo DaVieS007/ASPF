@@ -25,7 +25,7 @@
         {
             /** TRY BLACK/WHITELIST **/
             $domain_rule = $DB->query("SELECT type,expire FROM domains WHERE domain = '".$DB->escape($sender_domain)."' AND expire > '".time()."';")->fetch_array();
-            if($domain_rule["type"] == "whitelist")
+            if($domain_rule["type"] == "whitelist" || $domain_rule["type"] == "auto-whitelist")
             {
                 $msg2 = "Accept-Domain-On-Whitelist (".sdate($domain_rule["expire"]).")";
                 return "accept";
@@ -39,7 +39,7 @@
 
             /** TRY BLACK/WHITELIST **/
             $sender_rule = $DB->query("SELECT type,expire FROM senders WHERE address = '".$DB->escape($sender)."' AND expire > '".time()."';")->fetch_array();
-            if($sender_rule["type"] == "whitelist")
+            if($sender_rule["type"] == "whitelist" || $sender_rule["type"] == "auto-whitelist")
             {
                 $msg2 = "Accept-Sender-On-Whitelist Until: (".sdate($sender_rule["expire"]).")";
                 return "accept";
