@@ -41,7 +41,7 @@
             $var[1] = trim($var[1]);
             $arr[$var[0]] = $var[1];
         }
-/* CAUSE PROBLEM
+
         if(isset($arr["sasl_username"]) && $arr["sasl_username"])
         {
             $arr["real_sender"] = $arr["sasl_username"];            
@@ -50,7 +50,6 @@
         {
             $arr["real_sender"]  = $arr["sender"];
         }
-*/
 
         /** utc=utc@domain.ex **/
         /** SOME MAKEUP **/
@@ -66,8 +65,6 @@
                 }
             }
         }
-
-        $arr["real_sender"]  = $arr["sender"];
         
         if(strstr($arr["recipient"],"="))
         {
@@ -94,6 +91,16 @@
 
         if((isset($arr["sasl_username"]) && trim($arr["sasl_username"]) != "") || (isset($arr["exim_auth"]) && trim($arr["exim_auth"]) != "") || (isset($arr["server_port"]) && $arr["server_port"] == "10025"))
         {
+            /** DUNNO **/
+            if(!trim($arr["real_sender"]))
+            {
+                banner2($client,"DUNNO","No-Valid-Sender");
+                socket_write($client,"action=dunno\n");
+                socket_write($client,"\n");        
+                return false;
+            }
+            /** DUNNO **/
+
             /** LIMIT OUTGOING MESSAGES **/
             $msg = NULL;
             $ret = limit($DB,$arr,$msg,$srv_info);
@@ -134,6 +141,18 @@
         }
         else
         {
+
+            /** DUNNO **/
+            if(!trim($arr["real_sender"]))
+            {
+                banner($client,"DUNNO","No-Valid-Sender");
+                socket_write($client,"action=dunno\n");
+                socket_write($client,"\n");        
+                return false;
+            }
+            /** DUNNO **/
+
+
             /** VALIDATE INCOMING MESSAGES **/
             $msg = NULL;
             $msg2 = NULL;
