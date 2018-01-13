@@ -7,15 +7,15 @@
 	$config["default_language"] = "en";
 
 	/* EDIT THIS LINE **/
-	$config["admin_password"] = "console";
+	$config["admin_password"] = "adminpass";
 	/* EDIT THIS LINE **/
 
 	$config["force_ssl"] = true;
 	
 	$config["mysql_host"] = "localhost";
 	$config["mysql_user"] = "aspf";
-	$config["mysql_db"] = "mvcp_aspf";
-	$config["mysql_passwd"] = "console";
+	$config["mysql_db"] = "aspf";
+	$config["mysql_passwd"] = "thepassword";
 
 	$config["session_timeout"] = 3600; //seconds
 

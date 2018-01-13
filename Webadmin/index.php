@@ -58,7 +58,7 @@
         }
         else
         {
-            $RET = "Invalid Password!";
+            $RET = L("LOGIN_FAILED");
         }
     }
     elseif($URL[1] == "logout")
@@ -98,19 +98,6 @@
         elseif($ex[0] == "USER")
         {
             $RET = str_replace($key,$auth->user[strtolower($ex[1])],$RET);
-        }
-        elseif($ex[0] == "CUSTOM" && $ex[1] == "CHART_RESOLUTION")
-        {
-            /** CHART_RESOLUTION **/
-            if(isset($_GET["chart_resolution"]))
-            {
-                $auth->SESSION["chart_res"] = $_GET["chart_resolution"];
-                $url->go($URL);
-            }
-
-            $defres = $auth->SESSION["chart_res"];
-
-            /** CHART_RESOLUTION **/
         }
     }
 
