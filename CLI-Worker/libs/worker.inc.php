@@ -12,7 +12,7 @@
     /** SESSION GLOBALS **/
 
     /** SAFE_SEND **/
-    function safe_send($sock,&$data)
+    function safe_send($sock,$data)
     {
         $tlen = strlen($data);
         $size = $tlen;
