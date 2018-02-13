@@ -11,6 +11,31 @@
     $client_name = NULL;
     /** SESSION GLOBALS **/
 
+    /** SAFE_SEND **/
+    function safe_send($sock,&$data)
+    {
+        $tlen = strlen($data);
+        $size = $tlen;
+        while(true)
+        {
+            $len = socket_write($sock,$data);
+            if($len == 0 || $len < 0)
+            {
+                return $len;
+            }
+            else if($len < $size)
+            {
+                $size = $size - $len;
+                $data = substr($data,$len);
+            }
+            else if($len >= $size)
+            {
+                return $tlen;
+            }
+        }
+    }
+    /** SAFE_SEND **/
+
     /** WORKER **/
     function worker($client,$nodes)
     {
@@ -34,7 +59,7 @@
         if(!$FDSEL)
         {
             mlog("Worker","NOTICE","RECV-TIMEOUT ...");
-            socket_write($client,"recv-timeout\n");
+            safe_send($client,"recv-timeout\n");
             return false;
         }
 
@@ -54,15 +79,15 @@
                 {
                     mlog("Validate","NOTICE","[PASSED-ON-FAILURE] ".$arr["sender"]." -> ".$arr["recipient"]);
                     banner($client,"PASSED","Accept-On-Failure");
-                    socket_write($client,"action=dunno\n");
-                    socket_write($client,"\n");
+                    safe_send($client,"action=dunno\n");
+                    safe_send($client,"\n");
                     return false;
                 }
                 else
                 {
                     mlog("Validate","NOTICE","[DEFER-ON-FAILURE] ".$arr["sender"]." -> ".$arr["recipient"]);
-                    socket_write($client,"action=DEFER ASPF Service is currently offline, try again later\n");
-                    socket_write($client,"\n");
+                    safe_send($client,"action=DEFER ASPF Service is currently offline, try again later\n");
+                    safe_send($client,"\n");
                     return false;
                 }
             }
@@ -142,7 +167,7 @@
             else if(!$node)
             {
                 mlog("Worker","NOTICE","Client Dropped due not on the list: ".$peer_ip);
-                socket_write($client,"not-allowed-here\n");
+                safe_send($client,"not-allowed-here\n");
                 return false;    
             }        
 
@@ -163,7 +188,7 @@
         }
         else
         {
-            socket_write($client,"invalid-command\n");
+            safe_send($client,"invalid-command\n");
             return false;
         }
   
