@@ -200,7 +200,7 @@
         $banner = socket_read($socket,4096,PHP_BINARY_READ);
         /** WAIT FOR BANNER **/
 
-        socket_write($socket,"EHLO ".explode("@",$recipient)[1]."\r\n"); //SEND HELO
+        safe_send($socket,"EHLO ".explode("@",$recipient)[1]."\r\n"); //SEND HELO
 
         /** WAIT FOR CAPABILITY **/
         if(!socket_timeout($socket,5000))
@@ -211,7 +211,7 @@
         $capabilities = socket_read($socket,4096,PHP_BINARY_READ);
         /** WAIT FOR CAPABILITY **/
 
-        socket_write($socket,"MAIL FROM: <".$recipient.">"."\r\n"); //MAIL FROM
+        safe_send($socket,"MAIL FROM: <".$recipient.">"."\r\n"); //MAIL FROM
         /** WAIT FOR ANSWER **/
         if(!socket_timeout($socket,5000))
         {
@@ -225,7 +225,7 @@
         }
         /** WAIT FOR ANSWER **/
 
-        socket_write($socket,"RCPT TO: <".$sender.">"."\r\n"); //RCPT TO
+        safe_send($socket,"RCPT TO: <".$sender.">"."\r\n"); //RCPT TO
         /** WAIT FOR ANSWER **/
         if(!socket_timeout($socket,30000))
         {

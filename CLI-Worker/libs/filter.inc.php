@@ -7,13 +7,13 @@
     function banner(&$client,$state,$message)
     {
         global $config;
-        socket_write($client,"action=PREPEND X-ASPF: !".strtoupper($state)." (".$message.") | see: https://aspf.npulse.net\n");
+        safe_send($client,"action=PREPEND X-ASPF: !".strtoupper($state)." (".$message.") | see: https://aspf.npulse.net\n");
     }
 
     function banner2(&$client,$state,$message)
     {
         global $config;
-        socket_write($client,"action=PREPEND X-ASPF-S: !".strtoupper($state)." (".$message.") | see: https://aspf.npulse.net\n");
+        safe_send($client,"action=PREPEND X-ASPF-S: !".strtoupper($state)." (".$message.") | see: https://aspf.npulse.net\n");
     }
     /** BANNER **/
 
@@ -95,8 +95,8 @@
             if(!trim($arr["real_sender"]))
             {
                 banner2($client,"DUNNO","No-Valid-Sender");
-                socket_write($client,"action=dunno\n");
-                socket_write($client,"\n");        
+                safe_send($client,"action=dunno\n");
+                safe_send($client,"\n");        
                 return false;
             }
             /** DUNNO **/
@@ -108,16 +108,16 @@
             {
                 mlog("Limit","NOTICE","Sent: ".$arr["real_sender"]." -> ".$arr["recipient"]);
                 banner2($client,"PASSED","White");
-                socket_write($client,"action=dunno\n");
-                socket_write($client,"\n");
+                safe_send($client,"action=dunno\n");
+                safe_send($client,"\n");
                 return false;
             }
             else if($ret == "notify")
             {
                 banner2($client,"PASSED","Gray");
                 mlog("Limit","NOTICE","Limit Reached (Notify): ".$arr["real_sender"]." -> ".$arr["recipient"]);                
-                socket_write($client,"action=dunno\n");
-                socket_write($client,"\n");
+                safe_send($client,"action=dunno\n");
+                safe_send($client,"\n");
 
                 if($config["ANTISPAM"]["notify_command"])
                 {
@@ -128,8 +128,8 @@
             else if($ret == "reject")
             {
                 mlog("Limit","NOTICE","Limit Reached (Reject): ".$arr["real_sender"]." -> ".$arr["recipient"]);                
-                socket_write($client,"action=REJECT ".$msg."\n");
-                socket_write($client,"\n");
+                safe_send($client,"action=REJECT ".$msg."\n");
+                safe_send($client,"\n");
 
                 if($config["ANTISPAM"]["notify_command"])
                 {
@@ -145,9 +145,10 @@
             /** DUNNO **/
             if(!trim($arr["real_sender"]))
             {
+                mlog("Validate","NOTICE","No-Valid-Sender (Dunno)");                
                 banner($client,"DUNNO","No-Valid-Sender");
-                socket_write($client,"action=dunno\n");
-                socket_write($client,"\n");        
+                safe_send($client,"action=dunno\n");
+                safe_send($client,"\n");        
                 return false;
             }
             /** DUNNO **/
@@ -163,32 +164,32 @@
                 if($config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"])
                 {
                     mlog("Validate","NOTICE","[".$msg."] ".$arr["sender"]." -> ".$arr["recipient"]);
-                    socket_write($client,"action=REJECT ".$msg."\n");
-                    socket_write($client,"\n");
+                    safe_send($client,"action=REJECT ".$msg."\n");
+                    safe_send($client,"\n");
                     return false;                        
                 }
                 else
                 {
                     mlog("Validate","NOTICE","[".$msg2."] ".$arr["sender"]." -> ".$arr["recipient"]);
                     banner($client,"REJECT",$msg2);
-                    socket_write($client,"action=dunno\n");
-                    socket_write($client,"\n");
+                    safe_send($client,"action=dunno\n");
+                    safe_send($client,"\n");
                     return false;                        
                 }
             }
             else if($ret == "reject")
             {
                 mlog("Validate","NOTICE","[REJECT] ".$arr["sender"]." -> ".$arr["recipient"]);
-                socket_write($client,"action=REJECT ".$msg."\n");
-                socket_write($client,"\n");
+                safe_send($client,"action=REJECT ".$msg."\n");
+                safe_send($client,"\n");
                 return false;                                    
             }
             else if($ret == "accept")
             {
                 mlog("Validate","NOTICE","[PASSED] ".$arr["sender"]." -> ".$arr["recipient"]);
                 banner($client,"PASSED",$msg2);
-                socket_write($client,"action=dunno\n");
-                socket_write($client,"\n");
+                safe_send($client,"action=dunno\n");
+                safe_send($client,"\n");
                 return false;                        
         }
             /** VALIDATE INCOMING MESSAGES **/            
