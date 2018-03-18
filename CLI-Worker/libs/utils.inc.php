@@ -59,8 +59,8 @@
         global $config;
         global $silent;
 
-	$tmp = date($config["SERVER"]["date_format"],time())." | [".$node."] ".$message."\n";
-	file_put_contents("/var/log/aspf.log",$tmp,FILE_APPEND);
+        $tmp = date($config["SERVER"]["date_format"],time())." | [".$node."] ".$message."\n";
+        file_put_contents("/var/log/aspf.log",$tmp,FILE_APPEND);
         if(!$silent)
         {
             echo($tmp);    

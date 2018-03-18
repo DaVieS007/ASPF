@@ -158,7 +158,6 @@
             $msg = NULL;
             $msg2 = NULL;
             $ret = validate($DB,$arr,$msg,$msg2,$srv_info);
-            add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
             if($ret == "dunno")
             {
                 if($config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"])
@@ -166,6 +165,7 @@
                     mlog("Validate","NOTICE","[".$msg."] ".$arr["sender"]." -> ".$arr["recipient"]);
                     safe_send($client,"action=REJECT ".$msg."\n");
                     safe_send($client,"\n");
+                    add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
                     return false;                        
                 }
                 else
@@ -174,6 +174,7 @@
                     banner($client,"REJECT",$msg2);
                     safe_send($client,"action=dunno\n");
                     safe_send($client,"\n");
+                    add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
                     return false;                        
                 }
             }
@@ -182,6 +183,7 @@
                 mlog("Validate","NOTICE","[REJECT] ".$arr["sender"]." -> ".$arr["recipient"]);
                 safe_send($client,"action=REJECT ".$msg."\n");
                 safe_send($client,"\n");
+                add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
                 return false;                                    
             }
             else if($ret == "accept")
@@ -190,6 +192,7 @@
                 banner($client,"PASSED",$msg2);
                 safe_send($client,"action=dunno\n");
                 safe_send($client,"\n");
+                add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
                 return false;                        
         }
             /** VALIDATE INCOMING MESSAGES **/            

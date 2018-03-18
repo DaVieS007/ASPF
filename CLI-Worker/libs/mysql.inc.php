@@ -45,22 +45,22 @@ class database_handler
 	/** QUERY **/
 	function query($txt)
 	{
-		$try = true;
+		$try = 10;
 
 		while(true)
 		{
 			$res = $this->link->query($txt);
 			if(!$res && $this->link->error != NULL)
 			{
-				if($try)
+				if($try > 0)
 				{
 					$this->link->close();
 					$this->link = new mysqli($this->conn["host"],$this->conn["user"],$this->conn["passwd"],$this->conn["dbname"]);
-					$try = false;
+					$try--;
 					continue;
 				}
 
-//				file_put_contents("sql.err", "SQL Error: (".$txt.")\n",FILE_APPEND);
+				file_put_contents("sql.err", "SQL Error: (".$txt.")\n",FILE_APPEND);
 				echo("SQL Error: ".$txt."\n");
 				if($this->break_on_error)
 				{

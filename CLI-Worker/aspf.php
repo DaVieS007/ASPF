@@ -27,11 +27,65 @@
 
     require "libs/utils.inc.php";
 
+    ini_set("log_errors", 1);
+    ini_set("error_log", "/var/log/aspf-php.log");
+    error_reporting(0); // IMPORTANT IN DAEMON MODE DUE TO NO STDIN (!!!)
+
     /** C_STANDARD/LET_IT_GLOBAL **/
     $config = array();
     $sconfig = array();
     $max_workers = 0;
+    $inet4 = NULL;
+    $inet6 = NULL;
     /** C_STANDARD/LET_IT_GLOBAL **/
+
+
+	/** SIGNALS **/
+	function sig_handler($sig)
+	{
+		global $workers;
+		global $clients;
+
+		if($sig != SIGPIPE)
+		{
+			mlog("SIGNAL","","Shutdown Sequence Initiated ..");
+			socket_close($inet4);
+			socket_close($inet6);
+			mlog("SIGNAL","","Incoming Connections are prohibited");				
+						
+			$tmp = $clients;
+			reset($tmp);
+			while(list($k,$v) = each($clients))
+			{
+                safe_send($v,"action=DEFER ASPF Service is temporarily offline, try again later\n");
+                safe_send($v,"\n");
+            
+				mlog("SIGNAL","","Closing Socket / (DEFERRED) #".$v);				
+				socket_close($v);
+			}
+
+			$_workers = $workers;
+			reset($_workers);
+			while(list($k,$v) = each($_workers))
+			{
+				$res = pcntl_waitpid($v, $status, WNOHANG);
+				if($res == -1 || $res == 0)
+				{
+					mlog("SIGNAL","","Killing Child Worker: PID.".$v);
+					posix_kill($v, SIGKILL);
+				}
+			}
+
+			mlog("SIGNAL","","Reached ShutDown, Exiting normally ..");
+			sleep(1);
+			exit(0);
+		}
+	}
+	pcntl_signal(SIGTERM, "sig_handler");
+	pcntl_signal(SIGINT, "sig_handler");
+	pcntl_signal(SIGPIPE, "sig_handler");
+	pcntl_signal(SIGHUP, "sig_handler");
+	/** SIGNALS **/    
 
     /** RETRIEVE_CONFIG **/
     function retrieve_config()
@@ -134,6 +188,7 @@
 
     while(true)
     {
+        pcntl_signal_dispatch(); // Dispatch to signal handler
         try
         {
             $buf = NULL;
