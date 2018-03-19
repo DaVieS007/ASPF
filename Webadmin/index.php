@@ -73,6 +73,11 @@
         }
         else
         {
+            if(isset($_GET["fsearch"]) && $_GET["fsearch"])
+            {
+                $url->go(array($URL[0],"search",urlencode($_GET["fsearch"])));
+            }
+                
             require "pages/main/core.php";
         }
     }
