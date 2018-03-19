@@ -81,9 +81,7 @@
             if($custom_level >= 1)
             {
                 mlog("Validate","NOTICE","Round-1 | Checking MXes on domain: ".$sender_domain);                
-                $mxes = array();
-                $weight = array();
-                getmxrr ($sender_domain,$mxes, $weight);
+                $mxes = dns_get_record ($sender_domain, DNS_MX);
                 if(!count($mxes))
                 {
                     $msg = "ASPF: Your message is rejected due no MX record found on your sender domain (".$sender_domain."), try later.";
@@ -91,18 +89,6 @@
                     return "dunno";
                 }
             }
-
-            /*
-            $mxes2 = array();
-            $weight2 = array();
-            getmxrr ($client_domain,$mxes2, $weight2);
-            if(!count($mxes2))
-            {
-                $msg = "ASPF: Your message is rejected due no MX record found on your client domain (".$client_domain."), try later.";
-                $msg2 = "Marked-As-SPAM due no MX record found on client domain (".$client_domain.")";
-                return "dunno";
-            }
-            */
             /** ROUND - 1 **/
 
             /** ROUND - 2 **/
@@ -138,27 +124,6 @@
             if($custom_level >= 4)
             {
                 mlog("Validate","NOTICE","Round-4 | RBL Checking");                
-                /**                
-                $ret = probe_mail($sender,$recipient,$found_mx);
-                if($ret == "timeout")
-                {
-                    $msg = "ASPF: Your message is rejected due our test was timeout on your SMTP (".$_found_mx."), try later.";
-                    $msg2 = "Marked-As-SPAM due our test was timeout on sender SMTP (".$_found_mx.")";
-                    return "dunno";                                        
-                }
-                else if($ret == "issue")
-                {
-                    $msg = "ASPF: Your message is rejected due our test was unsuccessful on your SMTP (".$_found_mx."), try later.";
-                    $msg2 = "Marked-As-SPAM due our test was unsuccessful on sender SMTP (".$_found_mx.")";
-                    return "dunno";                                        
-                }
-                else if($ret == "fake")
-                {
-                    $msg = "ASPF: Your message is rejected due sender (".$sender.") not found on your SMTP (".$_found_mx."), try later.";
-                    $msg2 = "Marked-As-SPAM due sender (".$sender.") not found on sender SMTP (".$_found_mx.")";
-                    return "dunno";                                                            
-                }
-                **/
 
                 /** RBL_CHECK **/
                 $rbl = rbl_check($srv_info["client_ip"]);
@@ -183,7 +148,6 @@
                 }
             }
             /** ROUND - 5 **/
-
 
             /** ROUND - 6 **/
             if($custom_level >= 6)

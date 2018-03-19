@@ -99,40 +99,54 @@
     /** __GETHOSTBYNAME **/
     function __gethostbyname($host) 
     {
-        $dns6 = dns_get_record($host, DNS_AAAA);
-        $dns4 = dns_get_record($host, DNS_A);
-
-        if(!is_array($dns6))
+        $SOA = dns_get_record($host, DNS_SOA);
+        if(count($SOA) > 0)
         {
-            $dns6 = array();
-        }
-
-        if(!is_array($dns4))
-        {
-            $dns4 = array();
-        }
-
-        $dns = array_merge($dns4, $dns6);
-
-        $ip6 = array();
-        $ip4 = array();
-        foreach ($dns as $record) 
-        {
-            if ($record["type"] == "A") 
+            $dns6 = dns_get_record($host, DNS_AAAA);
+            $dns4 = dns_get_record($host, DNS_A);
+    
+            if(!is_array($dns6))
             {
-                $ip4[] = $record["ip"];
+                $dns6 = array();
             }
-
-            if ($record["type"] == "AAAA") 
+    
+            if(!is_array($dns4))
             {
-                $ip6[] = $record["ipv6"];
+                $dns4 = array();
             }
+    
+            $dns = array_merge($dns4, $dns6);
+    
+            $ip6 = array();
+            $ip4 = array();
+            foreach ($dns as $record) 
+            {
+                if ($record["type"] == "A") 
+                {
+                    $ip4[] = $record["ip"];
+                }
+    
+                if ($record["type"] == "AAAA") 
+                {
+                    $ip6[] = $record["ipv6"];
+                }
+            }
+            $ret = array();
+            $ret[4] = $ip4;
+            $ret[6] = $ip6;
+    
+            mlog("Resolver","NOTICE",$host.": ".implode(", ",$ip4)." ".implode(", ",$ip6));
+            return $ret;                
         }
-
-        $ret = array();
-        $ret[4] = $ip4;
-        $ret[6] = $ip6;
-        return $ret;
+        else
+        {
+            $ret = array();
+            $ret[4] = $ip4;
+            $ret[6] = $ip6;
+    
+            mlog("RESOLV","NOTICE",$host.": NO SOA Record");
+            return $ret;                
+        }
     }
     /** __GETHOSTBYNAME **/
 
@@ -340,7 +354,7 @@
         while(list($k,$v) = each($mxes))
         {
             $cc = 0;
-            $arr = __gethostbyname($v);
+            $arr = __gethostbyname($v["target"]);
             while(list($k,$ip) = each($arr[4]))
             {
                 if(!isset($socket4[$ip]))

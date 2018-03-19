@@ -145,11 +145,61 @@
             /** DUNNO **/
             if(!trim($arr["real_sender"]))
             {
-                mlog("Validate","NOTICE","No-Valid-Sender (Dunno)");                
-                banner($client,"DUNNO","No-Valid-Sender");
-                safe_send($client,"action=dunno\n");
-                safe_send($client,"\n");        
-                return false;
+                mlog("Validate","NOTICE","No Valid Sender, Using HELO_NAME");                
+
+                $hname = explode(".",$arr["helo_name"]);
+                $final_host = NULL;
+                $have_soa = false;
+                while(true)
+                {                    
+                    $final_host = implode(".",$hname);
+                    if(count($hname) > 2)
+                    {
+                        $SOA = dns_get_record ($final_host, DNS_SOA);
+                        if(count($SOA) > 0)
+                        {
+                            $tmp = $hname;
+                            $hname = array();
+                            for($i=1;$i<count($tmp);$i++)
+                            {
+                                $hname[] = $tmp[$i];
+                            }
+
+                            continue;
+                        }    
+                        else
+                        {
+                            $have_soa = true;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        $SOA = dns_get_record ($final_host, DNS_SOA);
+                        if(count($SOA) > 0)
+                        {
+                            $have_soa = true;
+                        }
+                        break;
+                    }
+                }
+
+                if($have_soa)
+                {
+                    mlog("Validate","NOTICE","Found SOA on interim domain: ".$final_host);                
+                }
+                else
+                {
+                    mlog("Validate","NOTICE","Not Found SOA but using interim domain: ".$final_host);                                    
+                }
+
+                $arr["sender"] = "<bounce>@".$final_host;
+                $arr["real_sender"] = "<bounce>@".$final_host;
+                $arr["bounce"] = true;
+            }
+            else
+            {
+                $arr["bounce"] = false;
             }
             /** DUNNO **/
 
