@@ -46,7 +46,7 @@
             $_nodes[$row["ID"]] = $row;
         }
 
-        mlog("NodeUpdate","NOTICE","Retrieved ".count($_nodes)." node config(s)");
+        //mlog("NodeUpdate","NOTICE","Retrieved ".count($_nodes)." node config(s)");
         $nodes = $_nodes;
         
         return true;
@@ -60,7 +60,24 @@
         global $silent;
 
         $tmp = date($config["SERVER"]["date_format"],time())." | [".$node."] ".$message."\n";
+        $f1 = !is_file("/var/log/aspf.log") || !isset($GLOBALS["log_inited"]);
+        $f2 = !is_file("/tmp/aspf.log") || !isset($GLOBALS["log_inited"]);
+
+        $GLOBALS["log_inited"] = true;
+
         file_put_contents("/var/log/aspf.log",$tmp,FILE_APPEND);
+        file_put_contents("/tmp/aspf.log",$tmp,FILE_APPEND | LOCK_EX);
+
+        if($f1)
+        {
+            chown("/var/log/aspf.log",$config["SERVER"]["user"]);
+        }
+
+        if($f2)
+        {
+            chown("/tmp/aspf.log",$config["SERVER"]["user"]);
+        }
+
         if(!$silent)
         {
             echo($tmp);    

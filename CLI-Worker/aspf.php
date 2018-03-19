@@ -92,6 +92,7 @@
     {
         global $config;
         global $sconfig;
+        
         $config = parse_ini_file("aspf.conf",true);    
         /** IF MVCP PRESENT WE PULL PASSWORDS FROM IT **/
         if($config["SERVER"]["mvcp_support"])
@@ -105,7 +106,7 @@
                     $config["DATABASE"]["mysql_user"] = "mvcp_aspf";
                     $config["DATABASE"]["mysql_password"] = $sconfig["aspf_password"];
                     $config["DATABASE"]["mysql_database"] = "mvcp_aspf";
-                    mlog("Init","NOTICE","ASPF-MVCP Configuration (Re)Loaded ..");
+                    //mlog("Init","NOTICE","ASPF-MVCP Configuration (Re)Loaded ..");
                     return true;
                 }    
                 else
@@ -120,7 +121,7 @@
         }
         else
         {
-            mlog("Init","NOTICE","ASPF Configuration (Re)Loaded ..");            
+            //mlog("Init","NOTICE","ASPF Configuration (Re)Loaded ..");            
         }
         /** IF MVCP PRESENT WE PULL PASSWORDS FROM IT **/    
     }
@@ -234,17 +235,46 @@
                     unset($workers[$k]);         
                     socket_close($socket_table[$k]);
                     unset($socket_table[$k]);
-                    mlog("Core","NOTICE","Worker-".$k." Exited ...");
+                    //mlog("Core","NOTICE","Worker-".$k." Exited ...");
                 }
             }
     
             /** UPDATE_CONFIG **/
-            if($last_update + 60 < time())
+            if($last_update + 1 < time())
             {
                 $stat = array();
                 $stat["workers"]["current"] = $max_workers;
                 $max_workers = 0;
                 $stat["workers"]["max"] = $config["SERVER"]["max_workers"];
+
+                $fp = fopen("/tmp/aspf.log","a+");
+                if($fp)
+                {
+                    if(flock($fp,LOCK_EX | LOCK_NB))
+                    {
+                        $log = file_get_contents("/tmp/aspf.log");
+                        file_put_contents("/tmp/aspf.log","");                        
+                        flock($fp,LOCK_UN);
+                    }    
+
+                    fclose($fp);
+                }
+
+                $log = explode("\n",$log);
+                while(list($k,$v) = each($log))
+                {
+                    if(trim($v))
+                    {
+                        $GLOBALS["LOGBUFFER"][] = $v;
+                    }
+                }
+
+                if(count($GLOBALS["LOGBUFFER"]) > 10)
+                {
+                    $GLOBALS["LOGBUFFER"] = array_slice($GLOBALS["LOGBUFFER"], -10, 10);
+                }
+
+                $stat["log"] = base64_encode(implode("\n",$GLOBALS["LOGBUFFER"]));
                 update_state("workers",$stat);
 
                 update_nodes($nodes);
@@ -274,7 +304,7 @@
                         else if ($pid) 
                         {
                             $workers[$wid] = $pid;
-                            mlog("Core","NOTICE","Worker-".$wid." Launched ...");
+                            //mlog("Core","NOTICE","Worker-".$wid." Launched ...");
                             unset($clients[$k]);
                         } 
                         else 

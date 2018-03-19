@@ -45,6 +45,18 @@
             $recipient = $data["recipient"];
             $recipient_domain = explode("@",$recipient)[1];
 
+            $access = true;
+
+            if($auth->reseller())
+            {
+                if(!isset($allowed_domains[explode("@",$sender)[1]]) && !isset($allowed_domains[explode("@",$recipient)[1]]))
+                {
+                    unset($URL[3]);
+                    $url->go($URL);
+                }    
+            }
+    
+
             /** PROCESS **/
             $exts = time() + 365*24*3600; // 1 Year
             if($_GET["action"] == "blacklist")
@@ -122,7 +134,7 @@
                     $v = date($config["date_format"],$v);
                 }
 
-                $table["td"][] = array($widget->bold(ucfirst($k)),$v);
+                $table["td"][] = array($widget->bold(ucfirst($k)),htmlspecialchars($v));
             }
             $widget->table(7,"",$table["th"],$table["td"]);
 
@@ -145,13 +157,13 @@
     
             $table["td"][] = array(
                 $widget->bold(L("SENDER")),
-                $sender,
+                htmlspecialchars($sender),
                 mail_state($sender_state["type"],$sender_state["expire"])
             );    
     
             $table["td"][] = array(
                 $widget->bold(L("RECIPIENT")),
-                $recipient,
+                htmlspecialchars($recipient),
                 mail_state($recipient_state["type"],$recipient_state["expire"])
             );    
     
@@ -195,53 +207,65 @@
 
     if($URL[2])
     {
-        $widget->head(12,L("RESULTS").": ".$URL[2]);
+        $widget->head(12,L("RESULTS").": ".htmlspecialchars($URL[2]));
 
         /** RESULTS **/
         $table = array();
         $table["th"] = array(L("SENDER"),L("RECIPIENT"),L("SMTP_NAME"),L("SENDER_NAME"),L("DATE"),"");
-        $res = $DB->query("SELECT ID,smtp_ip,smtp_name,sender_ip,sender_name,sender,recipient,action, tstamp FROM `transactions` WHERE tstamp > '".$ts."' AND (sender LIKE '%".$DB->escape($URL[2])."%' OR recipient LIKE '%".$DB->escape($URL[2])."%' ) ORDER BY tstamp DESC LIMIT 0,1000");
-        while($row = $res->fetch_array())
-        {
-            $sender = mailb($row["sender"],40);
-            if($row["action"] == "blacklist")
-            {
-                $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("BLACKLISTED"),"danger");
-            }
-            else if($row["action"] == "limit")
-            {
-                $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("LIMITED"),"primary");
-            }
-            else if($row["action"] == "reject")
-            {
-                $sender .= "<br />".$widget->badge(L("INCOMING"),"primary")."  ".$widget->badge(L("REJECTED"),"warning");
-            }
-            else if($row["action"] == "dunno")
-            {
-                $sender .= "<br />".$widget->badge(L("INCOMING"),"primary")."  ".$widget->badge(L("DUNNO"),"info");
-            }
-            else if($row["action"] == "sent")
-            {
-                $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("ACCEPTED"),"success");
-            }
-            else if($row["action"] == "accept")
-            {
-                $sender .= "<br />".$widget->badge(L("INCOMING"),"primary")."  ".$widget->badge(L("ACCEPTED"),"success");
-            }
 
-            $nurl = $URL;
-            $nurl[1] = "search";
-            $nurl[2] = urlencode($row["sender"]);
-            $nurl[3] = $row["ID"];
-            $table["td"][] = array(
-                $sender,
-                mailb($row["recipient"],40),
-                $row["smtp_ip"]."<br />".$widget->badge($row["smtp_name"],"primary"),
-                $row["sender_ip"]."<br />".$widget->badge($row["sender_name"],"primary"),
-                date($config["date_format"],$row["tstamp"]),
-            $widget->button("danger",L("INVESTIGATE"),
-            $url->write($nurl)));
-            
+        $access = true;
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[$URL[2]]) && !isset($allowed_domains[explode("@",$URL[2])[1]]))
+            {
+                $access = false;
+            }    
+        }
+
+        if($access)
+        {
+            $res = $DB->query("SELECT ID,smtp_ip,smtp_name,sender_ip,sender_name,sender,recipient,action, tstamp FROM `transactions` WHERE tstamp > '".$ts."' AND (sender LIKE '%".$DB->escape($URL[2])."%' OR recipient LIKE '%".$DB->escape($URL[2])."%' ) ORDER BY tstamp DESC LIMIT 0,1000");
+            while($row = $res->fetch_array())
+            {
+                $sender = mailb($row["sender"],40);
+                if($row["action"] == "blacklist")
+                {
+                    $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("BLACKLISTED"),"danger");
+                }
+                else if($row["action"] == "limit")
+                {
+                    $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("LIMITED"),"primary");
+                }
+                else if($row["action"] == "reject")
+                {
+                    $sender .= "<br />".$widget->badge(L("INCOMING"),"primary")."  ".$widget->badge(L("REJECTED"),"warning");
+                }
+                else if($row["action"] == "dunno")
+                {
+                    $sender .= "<br />".$widget->badge(L("INCOMING"),"primary")."  ".$widget->badge(L("DUNNO"),"info");
+                }
+                else if($row["action"] == "sent")
+                {
+                    $sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("ACCEPTED"),"success");
+                }
+                else if($row["action"] == "accept")
+                {
+                    $sender .= "<br />".$widget->badge(L("INCOMING"),"primary")."  ".$widget->badge(L("ACCEPTED"),"success");
+                }
+    
+                $nurl = $URL;
+                $nurl[1] = "search";
+                $nurl[2] = urlencode($row["sender"]);
+                $nurl[3] = $row["ID"];
+                $table["td"][] = array(
+                    $sender,
+                    mailb($row["recipient"],40),
+                    $row["smtp_ip"]."<br />".$widget->badge($row["smtp_name"],"primary"),
+                    $row["sender_ip"]."<br />".$widget->badge($row["sender_name"],"primary"),
+                    date($config["date_format"],$row["tstamp"]),
+                $widget->button("danger",L("INVESTIGATE"),
+                $url->write($nurl)));
+            }
         }
 
 	    $widget->table(12,"",$table["th"],$table["td"],"dt_results","4:desc");

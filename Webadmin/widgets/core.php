@@ -13,6 +13,13 @@
 		}
 		/** FLUSH **/
 
+		/** RROW **/
+		function rrow($ret)
+		{
+			return "<div class='row'>".$ret."</div>";
+		}
+		/** RROW **/
+
 		/** GET **/
 		function get()
 		{
@@ -56,6 +63,21 @@
 			$this->temp .= $this->col($col,'<p class="lead">'.$text.'</p>');
 		}
 		/** LEAD **/
+
+		/** RHEAD **/
+		function rhead($col,$text)
+		{
+			return $this->col($col,'<h1 class="page-header">'.$text.'</h1>');
+		}
+		/** RHEAD **/
+
+		/** RLEAD **/
+		function rlead($col,$text)
+		{
+			return $this->col($col,'<p class="lead">'.$text.'</p>');
+		}
+		/** RLEAD **/
+
 
 		/** SIGN **/
 		function sign($text)
@@ -158,6 +180,54 @@ EOF;
 		}
 		/** PRELOAD **/
 
+		/** ACCORDION **/
+		function accordion($col,$arr)
+		{
+			$hash = "A".md5(serialize($arr).time().mt_rand(0,9999));
+			$main = '
+				<div style="user-select: none;">
+					[DATA]
+				</div>
+			';
+
+			$card = '
+				<div class="panel panel-[TYPE]" id="'.$hash.'">
+					<div style="cursor: pointer;" onclick="$(\'.acc-'.$hash.'\').hide(\'fast\'); $(\'#'.$hash.'_[IDX]\').toggle(\'fast\');" class="panel-heading">
+						<h3 class="panel-title">[TITLE]</h3>
+					</div>
+
+
+					<div class="panel-body acc-'.$hash.'" id="'.$hash.'_[IDX]" style="[HIDE]">
+						[DATA]
+					</div>			  
+				</div>				
+			';
+
+			$data = "";
+			$num = 0;
+			while(list($k,$v) = each($arr))
+			{
+				$num++;
+				$tmp = $card;
+				$tmp = str_replace("[TITLE]",$k,$tmp);
+				$tmp = str_replace("[DATA]",$v[0],$tmp);
+				$tmp = str_replace("[TYPE]",$v[1],$tmp);
+				$tmp = str_replace("[IDX]",$num,$tmp);
+				if($v[2])
+				{
+					$tmp = str_replace("[HIDE]","",$tmp);
+				}
+				else
+				{
+					$tmp = str_replace("[HIDE]","display: none;",$tmp);					
+				}
+				$data .= $tmp;
+			}
+
+			$data = str_replace("[DATA]",$data,$main);
+			$this->temp .= $this->col($col,$data);
+		}
+		/** ACCORDION **/
 
 		/** INFOBAR **/
 		function infobar($col,$type,$text)
@@ -229,11 +299,44 @@ EOF;
 		}
 		/** PROGRESS **/
 
-		/** PANEL **/
-		function panel($type,$icon,$head,$lead,$action,$link)
+
+		/** PASSWORD **/
+		function password($txt)
+		{
+			global $pwd;
+			$hash = "H".md5($txt.time().mt_rand(0,9999999));
+			$data = '<div onclick="$(\'#'.$hash.'\').load(\''.$pwd->encode($txt).'\'); $(this).prop(\'onclick\',null).off(\'click\'); $(\'#show'.$hash.'\').hide();" style="margin: 5px; font-size: 18px; font-weight: bold; cursor: pointer;">
+			<span id="'.$hash.'" style="padding: 5px; 
+						border: 1px solid #333; 
+						border-top-left-radius: 20px; 
+						border-bottom-left-radius: 20px; 
+						background-color: rgba(0,0,0,0);">
+
+				<i class="fa fa-star-o"></i>
+				<i class="fa fa-star-o"></i>
+				<i class="fa fa-star-o"></i>
+				<i class="fa fa-star-o"></i>
+				<i class="fa fa-star-o"></i>
+				<i class="fa fa-star-o"></i>
+			</span>
+			<span id="show'.$hash.'" style="padding: 5px; 
+						border: 1px solid #333; 
+						border-top-right-radius: 20px; 
+						border-bottom-right-radius: 20px; 
+						background-color: rgba(0,0,0,0.0);">
+
+			<i style="font-size: 18px;"  class="fa fa-eye-slash"></i></div>
+			</span>
+			';
+
+		    return $data;
+		}
+		/** PASSWORD **/
+
+		/** RPANEL **/
+		function rpanel($col,$type,$icon,$head,$lead,$action = NULL,$link = NULL,$confirm = NULL)
 		{
 			$data = '
-			<div class="" onclick="self.location.href=\''.$link.'\'" style="margin-right: 10px; min-width: 200px; float: left;">
 		        <div class="panel panel-'.$type.'">
 		            <div class="panel-heading">
 		                <div class="row">
@@ -241,24 +344,176 @@ EOF;
 		                        <i class="fa fa-'.$icon.' fa-5x"></i>
 		                    </div>
 		                    <div class="col-xs-9 text-right">
-		                        <div class="huge">'.$head.'</div>
-		                        <div>'.$lead.'</div>
+		                        <div style="font-size: 24px;">'.$head.'</div>
+		                        <div style="font-size: 24px;">'.$lead.'</div>
 		                    </div>
 		                </div>
-		            </div>
-		            <a href="'.$link.'">
-		                <div class="panel-footer">
-		                    <span class="pull-left">'.$action.'</span>
-		                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-		                    <div class="clearfix"></div>
-		                </div>
-		            </a>
+					</div>
+					[LINK]					
 		        </div>
-		    </div>';
+			';
 
-		    $this->temp .= $data;
+			$_link = '
+				<a onclick="[CONFIRM]" href="'.$link.'">
+					<div class="panel-footer">
+						<span class="pull-left">'.$action.'</span>
+						<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+						<div class="clearfix"></div>
+					</div>
+				</a>
+			';
+
+			$status = '
+					<div class="panel-footer">
+						<span class="pull-left">'.$action.'</span>
+						<div class="clearfix"></div>
+					</div>
+			';
+
+
+			if($link && $action)
+			{
+				$data = str_replace("[LINK]",$_link,$data);
+			}
+			else if($action)
+			{
+				$data = str_replace("[LINK]",$status,$data);				
+			}
+			else
+			{
+				$data = str_replace("[LINK]","",$data);
+			}
+
+			if($link && $confirm)
+			{
+				$data = str_replace("[CONFIRM]","return confirm('".$confirm."');",$data);
+			}
+			else
+			{
+				$data = str_replace("[CONFIRM]","",$data);
+			}
+
+		    return $this->col($col,$data);
 		}
 		/** PANEL **/
+
+		/** PANEL **/
+		function panel($col,$type,$icon,$head,$lead,$action = NULL,$link = NULL,$confirm = NULL)
+		{
+			$data = '
+		        <div class="panel panel-'.$type.'">
+		            <div class="panel-heading">
+		                <div class="row">
+		                    <div class="col-xs-3">
+		                        <i class="fa fa-'.$icon.' fa-5x"></i>
+		                    </div>
+		                    <div class="col-xs-9 text-right">
+		                        <div style="font-size: 24px;">'.$head.'</div>
+		                        <div style="font-size: 24px;">'.$lead.'</div>
+		                    </div>
+		                </div>
+					</div>
+					[LINK]					
+		        </div>
+			';
+
+			$_link = '
+				<a onclick="[CONFIRM]" href="'.$link.'">
+					<div class="panel-footer">
+						<span class="pull-left">'.$action.'</span>
+						<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+						<div class="clearfix"></div>
+					</div>
+				</a>
+			';
+
+			$status = '
+					<div class="panel-footer">
+						<span class="pull-left">'.$action.'</span>
+						<div class="clearfix"></div>
+					</div>
+			';
+
+
+			if($link && $action)
+			{
+				$data = str_replace("[LINK]",$_link,$data);
+			}
+			else if($action)
+			{
+				$data = str_replace("[LINK]",$status,$data);				
+			}
+			else
+			{
+				$data = str_replace("[LINK]","",$data);
+			}
+
+			if($link && $confirm)
+			{
+				$data = str_replace("[CONFIRM]","return confirm('".$confirm."');",$data);
+			}
+			else
+			{
+				$data = str_replace("[CONFIRM]","",$data);
+			}
+			
+		    $this->temp .= $this->col($col,$data);
+		}
+		/** PANEL **/
+
+		/** WPANEL **/
+		function wpanel($col,$type,$icon,$head,$sub,$lead,$link = NULL)
+		{
+			$data = '
+			<a href="'.$link.'">
+		        <div class="panel panel-'.$type.'">
+		            <div class="panel-heading">
+		                <div class="row">
+		                    <div class="col-xs-3">
+								<i class="fa fa-'.$icon.' fa-5x"></i>
+		                    </div>
+		                    <div class="col-xs-9 text-right" style="min-height: 92px;">
+		                        <div style="font-size: 24px;">'.$head.'</div>
+		                        <div style="font-size: 14px;">'.$lead.'</div>
+							</div>
+							<div style="margin-left: -20px; margin-right: -20px; text-decorations: none; color: #333;">
+							'.$sub.'
+							</div>
+						</div>
+					</div>
+				</div>
+			</a>
+			';			
+		    $this->temp .= $this->col($col,$data);
+		}
+		/** WPANEL **/
+
+		/** IWPANEL **/
+		function iwpanel($col,$type,$icon,$head,$sub,$lead,$link = NULL)
+		{
+			$data = '
+			<a style="cursor: pointer;" onclick="inline_form(\''.$link.'\');">
+		        <div class="panel panel-'.$type.'">
+		            <div class="panel-heading">
+		                <div class="row" style="min-height: 50px;">
+		                    <div class="col-xs-3">
+								<i class="fa fa-'.$icon.' fa-5x"></i>
+								<p align="center">
+								'.$sub.'
+								</p>
+		                    </div>
+		                    <div class="col-xs-9 text-right">
+		                        <div style="font-size: 24px;">'.$head.'</div>
+		                        <div style="font-size: 14px;">'.$lead.'</div>
+		                    </div>
+		                </div>
+					</div>
+				</div>
+			</a>
+			';			
+		    $this->temp .= $this->col($col,$data);
+		}
+		/** IWPANEL **/
 
 		/** CPANEL **/
 		function cpanel($type,$icon,$head,$lead,$action)
@@ -485,7 +740,14 @@ EOF;
 			    	$temp = "";
 				    while(list($k2,$v) = each($arr))
 				    {
-			    		$temp .= "<td style='text-align: center;'>".$v."</td>";
+						if(is_array($v))
+						{
+							$temp .= "<td style='text-align: center;' data-sort='".$v[0]."'>".$v[1]."</td>";
+						}
+						else
+						{
+							$temp .= "<td style='text-align: center;'>".$v."</td>";							
+						}
 			    	}
 			    	$body .= str_replace("[BODY]",$temp,$tr);
 			    }
@@ -567,7 +829,7 @@ EOF;
 		/** HIDDEN **/
 		function hidden($data)
 		{
-			return "<hidden class='hidden'>".$data."</hidden>";
+			return "<span style='display:none;'>".$data."</span>";
 		}
 		/** HIDDEN **/
 
@@ -878,9 +1140,23 @@ EOF;
 		/** FORM_SEP **/
 		function form_sep()
 		{
-			$this->form .= "<div style='clear: both;'><hr /><div style='clear: both;'>";
+			$this->form .= "<hr style='clear: both;' /><div style='clear: both;'></div>";
 		}
 		/** FORM_SEP **/
+
+		/** SEP **/
+		function sep()
+		{
+			$this->temp .= "<div style='clear: both;'></div><hr /><div style='clear: both;'></div>";
+		}
+		/** SEP **/
+		
+		/** RSEP **/
+		function rsep()
+		{
+			return "<div style='clear: both;'></div><hr /><div style='clear: both;'></div>";
+		}
+		/** RSEP **/
 
 		/** INLINE_EDIT **/
 		function inline_edit($name,$value)
@@ -987,14 +1263,19 @@ EOF;
 		}
 		/** FORM_TEXT **/
 		
-
 		/** FORM_LABEL **/
-		function form_label($title,$help,$value)
+		function form_label($title,$help,$value,$psize=NULL)
 		{
+			if($psize > 0)
+			{
+				$psize = (100 / $psize) - $psize;
+				$psize = "float: left; margin-right: 5px; width: ".$psize."%";
+			}
+
 			$data = '
-			<div class="form-group">
+			<div class="form-group" style="cursor: not-allowed; '.$psize.'">
                 <label>'.$title.'</label>
-                <div class="form-control">'.$value.'</div>
+                <div class="form-control" style="font-style: italic; border: 1px dotted grey;">'.$value.'</div>
                 <p class="help-block">'.$help.'</p>
             </div>
             ';
@@ -1003,11 +1284,31 @@ EOF;
 		}
 		/** FORM_LABEL **/
 
+		/** FORM_ADD **/
+		function form_add($title,$help,$value,$psize=NULL)
+		{
+			if($psize > 0)
+			{
+				$psize = (100 / $psize) - $psize;
+				$psize = "float: left; margin-right: 5px; width: ".$psize."%";
+			}
+
+			$data = '
+			<div class="form-group" style="'.$psize.'">
+                <label>'.$title.'</label>
+                <div class="">'.$value.'</div>
+                <p class="help-block">'.$help.'</p>
+            </div>
+            ';
+
+			$this->form .= $data;
+		}
+		/** FORM_ADD **/
+
 
 		/** FORM_AUTOCOMPLETE **/
 		function form_autocomplete($name,$cb,$title,$help,$value,$psize=NULL)
 		{
-
 			if($psize > 0)
 			{
 				$psize = (100 / $psize) - $psize;
@@ -1250,6 +1551,243 @@ EOF;
 		}
 		/** INLINE_BUTTON_LEGACY **/
 		
+		/** FASTSEARCH **/
+		function fast_search($col,$name,$placeholder="")
+		{
+			$data = '
+			<div class="form-group">
+                <input id="fsearchbar" placeholder="'.$placeholder.'" style="width: 80%;  float: left;" class="form-control" type="text" value="" /> 
+                <button style="cursor: pointer; float: left; margin-left: 20px;" type="button" class="btn btn-danger" onclick="javascript:self.location.href = \'/?s=\' + encodeURIComponent($(\'#fsearchbar\').val());">'.$name.'</button>
+            </div>
+
+            <script>
+			$("#fsearchbar").keypress(function (e) {
+			  if (e.which == 13) {
+			    self.location.href = \'?fsearch=\' + encodeURIComponent($(\'#fsearchbar\').val());
+			  }
+
+			});            
+
+			function fsearch_focus()
+			{
+				$("#fsearchbar").focus();
+				setTimeout(function(){ fsearch_focus(); }, 100);
+			}
+			fsearch_focus();
+			
+			</script>
+            ';
+
+			$this->temp .= $this->col($col,$data);
+		}
+		/** FASTSEARCH **/
+
+		/** JUST_INPUT **/
+		function just_input($col,$frame,$name,$value=NULL)
+		{
+			$data = '
+			<div class="form-group">
+                <input id="just_input" style="width: 80%;  float: left;" class="form-control" type="text" value="'.$value.'" /> 
+                <button style="cursor: pointer; float: left; margin-left: 20px;" type="button" class="btn btn-danger" onclick="javascript:self.location.href = \'?'.$frame.'=\' + encodeURIComponent($(\'#just_input\').val());">'.$name.'</button>
+            </div>
+
+            <script>
+			$("#just_input").keypress(function (e) {
+			  if (e.which == 13) {
+			    self.location.href = \'?'.$frame.'=\' + encodeURIComponent($(\'#just_input\').val());
+			  }
+
+			});            
+
+			function jinput_focus()
+			{
+				$("#just_input").focus();
+				setTimeout(function(){ jinput_focus(); }, 100);
+			}
+			jinput_focus();
+			
+			</script>
+            ';
+
+			$this->temp .= $this->col($col,$data);
+		}
+		/** JUST_INPUT **/		
+
+		/** JUST_AJAX_INPUT **/
+		function just_ajax_input($col,$frame,$name,$value=NULL)
+		{
+			$data = '
+			<div class="form-group">
+                <input id="just_input" style="width: 80%;  float: left;" class="form-control" type="text" value="'.$value.'" /> 
+                <button style="cursor: pointer; float: left; margin-left: 20px;" type="button" class="btn btn-danger" onclick="just_ajax_submit();">'.$name.'</button>
+            </div>
+
+			<script>
+			function just_ajax_submit()
+			{
+				var url = \'?'.$frame.'=\' + encodeURIComponent($(\'#just_input\').val());
+				$(\'#seamless\').load(url); $(\'#inline_form\').modal(\'hide\');			
+			}
+
+			$("#just_input").keypress(function (e) {
+			  if (e.which == 13) {
+				var url = \'?'.$frame.'=\' + encodeURIComponent($(\'#just_input\').val());
+				$(\'#seamless\').load(url); $(\'#inline_form\').modal(\'hide\');				
+			  }
+
+			});            
+
+			function jinput_focus()
+			{
+				$("#just_input").focus();
+				setTimeout(function(){ jinput_focus(); }, 100);
+			}
+			jinput_focus();
+			
+			</script>
+            ';
+
+			$this->temp .= $this->col($col,$data);
+		}
+		/** JUST_AJAX_INPUT **/		
+
+		/** AJAX LOAD **/
+		function ajax_load($col,$text,$state_url,$retry=NULL)
+		{
+			/**
+			 * array() {
+			 * 	done = true/false
+			 *  text = state_text
+			 *  data = data
+			 * }
+			 */
+			$hash = md5($text.$state_url);
+			$data = '
+			<div id="TH_[HASH]" style="display: none;"></div>
+			<div id="H_[HASH]" align="center" style="margin: 5px; padding: 10px;">
+				<img src="/admin_html/images/cube.svg" style="min-width: 64px; min-height: 64px; max-width: 64px;" />
+				<h4 style="padding-bottom: 50px; margin-top: 20px;" id="H2_[HASH]"></h4>
+			</div>
+
+			<div id="LH_[HASH]" align="center" style="margin: 5px; padding: 10px;">
+			</div>
+
+			<script>
+				$("#H2_[HASH]").html("[TEXT]");
+				function refresh_[HASH]()
+				{
+					$("#TH_[HASH]").load( "[URL]", function() {
+						try {
+							var obj = JSON.parse($("#TH_[HASH]").html());
+						} 
+						catch(err)
+						{
+							$("#H_[HASH]").html("<div align=\'left\'>" + "<h2>Error Occured :(</h2>" + "</div>");
+						}
+
+						if(obj["done"])
+						{
+							$("#LH_[HASH]").html("");
+							$("#H_[HASH]").html("<div align=\'left\'>" + hex2bin(obj["data"]) + "</div>");
+
+							setTimeout(function(){ 
+								refresh_[HASH]();
+							}, [RETRY]);							
+						}
+						else
+						{
+							$("#H2_[HASH]").html(obj["text"]);
+							if(obj["data"])
+							{
+								$("#LH_[HASH]").html("<div align=\'left\'>" + hex2bin(obj["data"]) + "</div>");
+							}
+
+							setTimeout(function(){ 
+								refresh_[HASH]();
+							}, 1000);										
+						}								
+
+
+					});					
+				}
+
+				setTimeout(function(){ 
+					refresh_[HASH]();
+				}, 1000);
+			</script>
+			';
+
+			if(!$retry)
+			{
+				$retry = 600000000;
+			}
+
+			$data = str_replace("[HASH]",$hash,$data);
+			$data = str_replace("[TEXT]",$text,$data);
+			$data = str_replace("[RETRY]",$retry,$data);
+			$data = str_replace("[URL]",$state_url,$data);
+
+			$this->temp .= $this->col($col,$data);
+		}
+		/** AJAX LOAD **/
+
+		/** AJAX LOAD2 **/
+		function ajax_load2($col,$text,$state_url)
+		{
+			/**
+			 * array() {
+			 * 	done = true/false
+			 *  text = state_text
+			 *  data = data
+			 * }
+			 */
+			$hash = md5($text.$state_url);
+			$data = '
+			<div id="TH_[HASH]" style="display: none;"></div>
+			<div id="H_[HASH]" align="center" style="margin: 5px; padding: 10px;">
+				<img src="/admin_html/images/cube.svg" style="min-width: 64px; min-height: 64px; max-width: 64px;" />
+				<h4 style="padding-bottom: 50px; margin-top: 20px;" id="H2_[HASH]"></h4>
+			</div>
+
+			<div id="LH_[HASH]" align="center" style="margin: 5px; padding: 10px;">
+			</div>
+
+			<script>
+				$("#H2_[HASH]").html("[TEXT]");
+				function refresh_[HASH]()
+				{
+					$("#TH_[HASH]").load( "[URL]", function() {
+						var obj = $("#TH_[HASH]").html();
+
+						if(obj != "K")
+						{
+							$("#LH_[HASH]").html("");
+							$("#H_[HASH]").html("<div align=\'left\'>" + obj + "</div>");
+						}
+						else
+						{
+							setTimeout(function(){ 
+								refresh_[HASH]();
+							}, 1000);										
+						}								
+
+
+					});					
+				}
+
+				setTimeout(function(){ 
+					refresh_[HASH]();
+				}, 1000);
+			</script>
+			';
+
+			$data = str_replace("[HASH]",$hash,$data);
+			$data = str_replace("[TEXT]",$text,$data);
+			$data = str_replace("[URL]",$state_url,$data);
+
+			$this->temp .= $this->col($col,$data);
+		}
+		/** AJAX LOAD2 **/
 
 		/** TERMINAL **/
 		function terminal($url,$text)
@@ -1259,37 +1797,6 @@ EOF;
 		}
 		/** TERMINAL **/
 
-		/** ID_CARD **/
-		function id_card($col,$ID)
-		{
-			global $URL;
-			global $url;
-
-			$nurl = array();
-			$nurl[0] = $URL[0];
-			$nurl[1] = "id-card";
-			$nurl[2] = $ID;
-			$_url = $url->write($nurl);
-
-			$this->temp .= $this->col($col,"<a href='".$_url."' download><img src='".$_url."' /></a>");
-		}
-		/** ID_CARD **/
-
-		/** ID_CARD **/
-		function id_card2($col,$ID)
-		{
-			global $URL;
-			global $url;
-
-			$nurl = array();
-			$nurl[0] = $URL[0];
-			$nurl[1] = "id-card";
-			$nurl[2] = $ID;
-			$_url = $url->write($nurl);
-
-			$this->temp .= $this->col($col,"<img src='".$_url."' />");
-		}
-		/** ID_CARD **/
 
 		/** IMAGE_SELECT **/
 		function image_select($col,$name1,$title1,$url1,$name2,$title2,$url2)
@@ -1341,19 +1848,25 @@ EOF;
 		/** FORM **/
 		function form($col,$type,$title,$submit=NULL,$cancel=NULL,$cancel_text=NULL)
 		{
+			/*
 			if(!$submit)
 			{
 				$submit = L("FORM_SUBMIT");
 			}
+			*/
 
-			$this->form_submit($type,$submit);
+			if($submit)
+			{
+				$this->form_submit($type,$submit);
+			}
+
 			if($cancel && $cancel_text)
 			{
-				$this->form .= $this->button("info",$cancel_text,$cancel);
+				$this->form .= $this->button("primary",$cancel_text,$cancel);
 			}
 			else if($cancel)
 			{
-				$this->form .= $this->button("info",L("CANCEL"),$cancel);
+				$this->form .= $this->button("primary",L("CANCEL"),$cancel);
 			}
 
 

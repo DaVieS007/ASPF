@@ -12,6 +12,10 @@
 	{
 		require "pages/search/main.php";
 	}
+        elseif($URL[1] == "fast_search")
+        {
+                require "pages/fast_search/main.php";
+        }
 	elseif($URL[1] == "whitelist")
 	{
 		require "pages/whitelist/main.php";

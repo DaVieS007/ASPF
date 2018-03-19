@@ -13,10 +13,10 @@
             $a = substr($text,0,6);
             $cut = strlen($text) - $mlen;
             $b = substr($text,6+$cut + 4);
-            return $a."[..]".$b;
+            return htmlspecialchars($a."[..]".$b);
         }
 
-        return $text;
+        return htmlspecialchars($text);
     }
     /** MAILB **/
 

@@ -8,7 +8,6 @@
 		$data = explode(":",$URL[2]);
 		if($data[0] == "node")
 		{
-
 			$settings = $DB->query("SELECT * FROM nodes WHERE ID = '".$DB->escape($data[1])."'")->fetch_array();
 			if(!$settings["ID"])
 			{
@@ -81,7 +80,6 @@
 			$widget->form(12,"danger",$settings["name"],L("FORM_SUBMIT"),$url->write($curl));			
 		}
 	}
-
 	/** NODE EDIT **/
 	else
 	{
@@ -99,33 +97,51 @@
 			}
 			else
 			{
-				$data = json_decode($state["data"],true);
-				$percent = (100 / $data["workers"]["max"])*$data["workers"]["current"];
-	
-				$widget->infobar(12,"success",L("ASPF_ONLINE"));
-				$A = $widget->row();
-	
-				$widget->lead(12,L("CURRENT_USAGE").": ".$data["workers"]["current"]." / ".$data["workers"]["max"]." ( ".$percent."% )");
-				if($percent > 90)
+				if(isset($_GET["ajax"]) && $_GET["ajax"] == "dash-info")
 				{
-					$widget->add($widget->col(12,$widget->progress("danger",$percent)));							
-				}
-				else if($percent > 75)
-				{
-					$widget->add($widget->col(12,$widget->progress("warning",$percent)));							
-				}
-				else if($percent > 45)
-				{
-					$widget->add($widget->col(12,$widget->progress("primary",$percent)));											
+					/** AJAX VIEW **/
+					$data = json_decode($state["data"],true);
+					$percent = (100 / $data["workers"]["max"])*$data["workers"]["current"];
+		
+					$widget->infobar(12,"success",L("ASPF_ONLINE"));
+					$A = $widget->row();
+		
+					$widget->lead(12,L("CURRENT_USAGE").": ".$data["workers"]["current"]." / ".$data["workers"]["max"]." ( ".$percent."% )");
+					if($percent > 90)
+					{
+						$widget->add($widget->col(12,$widget->progress("danger",$percent)));							
+					}
+					else if($percent > 75)
+					{
+						$widget->add($widget->col(12,$widget->progress("warning",$percent)));							
+					}
+					else if($percent > 45)
+					{
+						$widget->add($widget->col(12,$widget->progress("primary",$percent)));											
+					}
+					else
+					{
+						$widget->add($widget->col(12,$widget->progress("success",$percent)));											
+					}
+		
+					$B = $widget->row();
+
+					
+					$CONTENT = $widget->col(6,$A);
+					$CONTENT .= $widget->col(6,$B);
+					$CONTENT .= $widget->rcode(12,base64_decode($data["log"]));
+
+					$arr = array();
+					$arr["done"] = true;
+					$arr["data"] = bin2hex(utf8_decode($CONTENT));
+					echo(json_encode($arr));
+					die();
+					/** AJAX VIEW **/				
 				}
 				else
 				{
-					$widget->add($widget->col(12,$widget->progress("success",$percent)));											
+					$widget->ajax_load(12,L("LOADING"),"?ajax=dash-info",1000);
 				}
-	
-				$B = $widget->row();
-				$CONTENT .= $widget->col(6,$A);
-				$CONTENT .= $widget->col(6,$B);
 			}
 		}
 		$CONTENT .= $widget->row();
@@ -151,14 +167,25 @@
 		$dunno_p = $tp * $dunno;
 	
 		/** STAT **/
-		$table = array();
-		$table["th"] = array("","","");
-		$table["td"][] = array(L("MAIL_SENT")."<br />".$widget->progress("primary",$sent_p),$sent,round($sent_p)."%");
-		$table["td"][] = array(L("MAIL_REJECT_TO_SEND")."<br />".$widget->progress("warning",$reject_p),$reject,round($reject_p)."%");
-		$table["td"][] = array(L("MAIL_ACCEPT")."<br />".$widget->progress("success",$accept_p),$accept,round($accept_p)."%");
-		$table["td"][] = array(L("MAIL_CAUGHT")."<br />".$widget->progress("danger",$dunno_p),$dunno,round($dunno_p)."%");
-		
-		$widget->table(12,$total." ".L("MAIL_PASSED"),$table["th"],$table["td"]);
+		if(isset($_GET["ajax"]) && $_GET["ajax"] == "stat-info")
+		{
+			$table = array();
+			$table["th"] = array("","","");
+			$table["td"][] = array(L("MAIL_SENT")."<br />".$widget->progress("primary",$sent_p),$sent,round($sent_p)."%");
+			$table["td"][] = array(L("MAIL_REJECT_TO_SEND")."<br />".$widget->progress("warning",$reject_p),$reject,round($reject_p)."%");
+			$table["td"][] = array(L("MAIL_ACCEPT")."<br />".$widget->progress("success",$accept_p),$accept,round($accept_p)."%");
+			$table["td"][] = array(L("MAIL_CAUGHT")."<br />".$widget->progress("danger",$dunno_p),$dunno,round($dunno_p)."%");
+			
+			$arr = array();
+			$arr["data"] = bin2hex(utf8_decode($widget->rtable(12,$total." ".L("MAIL_PASSED"),$table["th"],$table["td"])));
+			$arr["done"] = true;
+			echo(json_encode($arr));
+			die();
+		}
+		else
+		{
+			$widget->ajax_load(12,L("LOADING"),"?ajax=stat-info",1000);
+		}
 		/** STAT **/	
 	
 		/** NODES **/

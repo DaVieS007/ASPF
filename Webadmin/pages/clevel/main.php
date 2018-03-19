@@ -5,28 +5,43 @@
     if(count($_POST))
     {
         $target = $_POST["sender"];
-        if(strstr($target,"@"))
+
+        $access = true;
+
+        if($auth->reseller())
         {
-            $ID = $DB->query("SELECT ID FROM custom_level WHERE address = '".$DB->escape($target)."'")->fetch_array()["ID"];
-            if($ID)
+            if(!isset($allowed_domains[explode("@",$target)[1]]) && !isset($allowed_domains[$target]))
             {
-                $DB->query("UPDATE custom_level SET level = '".$DB->escape($_POST["level"])."' WHERE ID = '".$ID."'");
-            }
-            else
-            {
-                $DB->query("INSERT INTO custom_level (address,level) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["level"])."');");
-            }
+                $access = false;
+                $widget->form_note("danger",L("ACCESS_DENIED"));
+            }    
         }
-        else
+
+        if($access)
         {
-            $ID = $DB->query("SELECT ID FROM custom_level WHERE domain = '".$DB->escape($target)."'")->fetch_array()["ID"];
-            if($ID)
+            if(strstr($target,"@"))
             {
-                $DB->query("UPDATE custom_level SET level = '".$DB->escape($_POST["level"])."' WHERE ID = '".$ID."'");
+                $ID = $DB->query("SELECT ID FROM custom_level WHERE address = '".$DB->escape($target)."'")->fetch_array()["ID"];
+                if($ID)
+                {
+                    $DB->query("UPDATE custom_level SET level = '".$DB->escape($_POST["level"])."' WHERE ID = '".$ID."'");
+                }
+                else
+                {
+                    $DB->query("INSERT INTO custom_level (address,level) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["level"])."');");
+                }
             }
             else
             {
-                $DB->query("INSERT INTO custom_level (domain,level) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["level"])."');");
+                $ID = $DB->query("SELECT ID FROM custom_level WHERE domain = '".$DB->escape($target)."'")->fetch_array()["ID"];
+                if($ID)
+                {
+                    $DB->query("UPDATE custom_level SET level = '".$DB->escape($_POST["level"])."' WHERE ID = '".$ID."'");
+                }
+                else
+                {
+                    $DB->query("INSERT INTO custom_level (domain,level) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["level"])."');");
+                }
             }
         }
     }
@@ -60,7 +75,15 @@
 	{
 		$sender = $row["address"];
 
-		$table["td"][] = array($sender,"LV-".$row["level"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]));
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[explode("@",$sender)[1]]))
+            {
+                continue;
+            }    
+        }
+        
+		$table["td"][] = array(htmlspecialchars($sender),"LV-".$row["level"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]));
 	}
 
 	$widget->table(6,L("CLEVEL_MAILS"),$table["th"],$table["td"],"dt_wlsenders","1:desc");
@@ -74,7 +97,16 @@
 	{
 		$sender = $row["domain"];
 
-		$table["td"][] = array($sender,"LV-".$row["level"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]));
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[$sender]))
+            {
+                continue;
+            }    
+        }
+
+
+		$table["td"][] = array(htmlspecialchars($sender),"LV-".$row["level"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]));
 	}
 
 	$widget->table(6,L("CLEVEL_DOMAINS"),$table["th"],$table["td"],"dt_wldomains","1:desc");

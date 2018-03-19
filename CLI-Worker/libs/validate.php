@@ -41,16 +41,19 @@
             $sender_rule = $DB->query("SELECT type,expire FROM senders WHERE address = '".$DB->escape($sender)."' AND expire > '".time()."';")->fetch_array();
             if($sender_rule["type"] == "whitelist" || $sender_rule["type"] == "auto-whitelist")
             {
+                mlog("Validate","NOTICE","Sender on Whitelist, Accepting");
                 $msg2 = "Accept-Sender-On-Whitelist Until: (".sdate($sender_rule["expire"]).")";
                 return "accept";
             }
             else if($sender_rule["type"] == "cache")
             {
+                mlog("Validate","NOTICE","Sender in Cache, Accepting");
                 $msg2 = "Accept-Sender-On-Cache Until: (".sdate($sender_rule["expire"]).")";
                 return "accept";                
             }
             else if($sender_rule["type"] == "blacklist")
             {
+                mlog("Validate","NOTICE","Sender on Blacklist, Rejecting");
                 $msg = "ASPF: Your message is rejected due sender address is on blacklist until: ".sdate($sender_rule["expire"]);
                 return "reject";
             }

@@ -36,6 +36,7 @@
     <script src="/admin_html/js/circle-progress.min.js"></script>
     <script src="/admin_html/js/jscolor.min.js"></script>
     <script src="/admin_html/js/jquery.ac.js"></script>
+    <script src="/admin_html/js/custom.js"></script>
     <script>
     if (screen.width < 767)
     {
@@ -75,8 +76,8 @@
                 </li>
 
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {!USER:NAME} <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {!USER:NAME} <!--<b class="caret"></b>--></a>
+                    <ul class="dropdown-menu" style="display: none;">
                         <li>
                             <a href="/{!LANG:PREFIX}/logout"><i class="fa fa-fw fa-power-off"></i> {!LANG:LOGOUT}</a>
                         </li>
@@ -91,43 +92,15 @@
             </div>
             <!-- /.navbar-collapse -->
         </nav>
-
-        <div id="chart_preview" style="-webkit-box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.75); box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.75); width: 700px; height: 500px; position: fixed; bottom: 0px; left: 0px; border: 1px solid black; z-index: 9997; background-color: white; display: none;">
-            <div style="cursor: pointer; z-index: 9998; position: absolute; right: 0px; top: 0px;" onclick="chart_preview('');" class="fa fa-close fa-2x"></div>
-            <img id="chart_image" class="pChartPicture" style="display: none;" />
-            <div class="" style="position: relative; top: 250px; margin-top: -92px; left: 325px; margin-left: -32px;">
-                <img src="/admin_html/images/cube.svg" />
+        <div class="modal fade" id="inline_form" tabindex="-1" role="dialog" aria-labelledby="inline_form_Label">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <!--<button type="button" style="margin: 30px;" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
+                    <div class="modal-body" id="inline_form_content">{!LANG:LOADING}</div>
+                </div>
             </div>
-            <div style="text-align: center; position: relative; top: 280px;">{!LANG:LOADING}</div>
-
         </div>
-
-
-        <div id="inline_form" style="-webkit-box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.75); box-shadow: 0px 0px 14px 2px rgba(0,0,0,0.75); width: 700px; height: 400px; position: fixed; bottom: 0px; left: 0px; border: 1px solid black; z-index: 9997; background-color: white; display: none;">
-            <div style="cursor: pointer; z-index: 9998; position: absolute; right: 25px; top: 15px;" onclick="$('#inline_form_content').hide(); $('#inline_form').hide();" class="fa fa-close fa-2x"></div>
-            <div id="inline_form_content" style="display: none; position: relative; height: 380px; overflow: scroll; overflow-x: hidden; margin: 5px;"></div>
-            <div class="fa fa-spinner fa-5x" style="position: relative; top: 200px; margin-top: -92px; left: 350px; margin-left: -32px;">
-            </div>
-            <div style="text-align: center; position: relative; top: 230px;">{!LANG:LOADING}</div>
-
-        </div>
-
-
-        <div id="terminal" style="display: none;">
-            <div style="color: white; cursor: pointer; z-index: 9998; position: absolute; right: 25px; top: 15px;" onclick="terminal('');" class="fa fa-close fa-2x">
-            </div>
-            <pre id="terminal_output"></pre>
-            <script>
-            $(document).keyup(function(e) {
-                 if (e.keyCode == 27) { // escape key maps to keycode `27`
-                    terminal('');
-                }
-            });
-            </script>
-        </div>
-
-        <div id="terminal_data" style="display: none;"></div>
-
+        
 
         <script>
         function setCookie(key, value) 
@@ -173,15 +146,15 @@
         {
             if(url != "")
             {
-                $("#inline_form").show();
-                $("#inline_form_content").load(url,function() {
+                $("#inline_form").modal('show');
+                $("#inline_form_content").load(url/*,function() {
                     $("#inline_form_content").show();
-                });
+                }*/);
             }
             else
             {
-                $("#inline_form").hide();
-                $("#inline_form_content").hide();
+                $("#inline_form").modal('hide');
+                //$("#inline_form_content").hide();
             }
         }
 
@@ -247,7 +220,7 @@
         </script>
 
 
-        <div id="page-wrapper">
+        <div id="page-wrapper" style="background-color: #FFF;">
 
             <div class="container-fluid" style="min-height: 1200px;">
                 [MAIN]
@@ -269,6 +242,11 @@
 
     <script>
     $(document).keydown(function(e) {
+
+        if (e.keyCode == 118 || (e.keyCode == 70 && e.ctrlKey)) { 
+            inline_form('/{!LANG:PREFIX}/fast_search');
+        }
+
          if (e.keyCode == 113) { 
                 html2canvas($("#page-wrapper"), {
                 onrendered: function(canvas) {
@@ -286,12 +264,6 @@
     });
     </script>
 
-    <script>
-    if(CB != undefined)
-    {
-        CB.token('[TOKEN]');
-    }
-    </script>
     <!--[if lte IE 8]><script src="js/excanvas.min.js"></script><![endif]-->
 
 </body>

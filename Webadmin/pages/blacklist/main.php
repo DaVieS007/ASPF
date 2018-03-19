@@ -64,7 +64,7 @@
 	{
 		$sender = $row["address"];
 
-		$table["td"][] = array($sender,date($config["date_format"],$row["expire"]),$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]));
+		$table["td"][] = array(htmlspecialchars($sender),date($config["date_format"],$row["expire"]),$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]));
 	}
 
 	$widget->table(6,L("BLACKLIST_SENDERS"),$table["th"],$table["td"],"dt_blsenders","1:desc");
@@ -78,7 +78,7 @@
 	{
 		$sender = $row["domain"];
 
-		$table["td"][] = array($sender,date($config["date_format"],$row["expire"]),$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove_domain=".$row["ID"]));
+		$table["td"][] = array(htmlspecialchars($sender),date($config["date_format"],$row["expire"]),$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove_domain=".$row["ID"]));
 		
 	}
 

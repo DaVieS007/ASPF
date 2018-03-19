@@ -5,28 +5,42 @@
     if(count($_POST))
     {
         $target = $_POST["sender"];
-        if(strstr($target,"@"))
+        $access = true;
+
+        if($auth->reseller())
         {
-            $ID = $DB->query("SELECT ID FROM mail_limit WHERE address = '".$DB->escape($target)."'")->fetch_array()["ID"];
-            if($ID)
+            if(!isset($allowed_domains[explode("@",$target)[1]]) && !isset($allowed_domains[$target]))
             {
-                $DB->query("UPDATE mail_limit SET `limit` = '".$DB->escape($_POST["limit"])."' WHERE ID = '".$ID."'");
-            }
-            else
-            {
-                $DB->query("INSERT INTO mail_limit (address,`limit`) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["limit"])."');");
-            }
+                $access = false;
+                $widget->form_note("danger",L("ACCESS_DENIED"));
+            }    
         }
-        else
+
+        if($access)
         {
-            $ID = $DB->query("SELECT ID FROM mail_limit WHERE domain = '".$DB->escape($target)."'")->fetch_array()["ID"];
-            if($ID)
+            if(strstr($target,"@"))
             {
-                $DB->query("UPDATE mail_limit SET `limit` = '".$DB->escape($_POST["limit"])."' WHERE ID = '".$ID."'");
+                $ID = $DB->query("SELECT ID FROM mail_limit WHERE address = '".$DB->escape($target)."'")->fetch_array()["ID"];
+                if($ID)
+                {
+                    $DB->query("UPDATE mail_limit SET `limit` = '".$DB->escape($_POST["limit"])."' WHERE ID = '".$ID."'");
+                }
+                else
+                {
+                    $DB->query("INSERT INTO mail_limit (address,`limit`) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["limit"])."');");
+                }
             }
             else
             {
-                $DB->query("INSERT INTO mail_limit (domain,`limit`) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["limit"])."');");
+                $ID = $DB->query("SELECT ID FROM mail_limit WHERE domain = '".$DB->escape($target)."'")->fetch_array()["ID"];
+                if($ID)
+                {
+                    $DB->query("UPDATE mail_limit SET `limit` = '".$DB->escape($_POST["limit"])."' WHERE ID = '".$ID."'");
+                }
+                else
+                {
+                    $DB->query("INSERT INTO mail_limit (domain,`limit`) VALUES ('".$DB->escape($target)."','".$DB->escape($_POST["limit"])."');");
+                }
             }
         }
     }
@@ -67,7 +81,14 @@
 	{
 		$sender = $row["address"];
 
-		$table["td"][] = array($sender,$row["limit"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]).$widget->button("warning",L("EDIT"),$url->write($URL)."?edit=".$row["ID"]));
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[explode("@",$sender)[1]]))
+            {
+                continue;
+            }    
+        }
+		$table["td"][] = array(htmlspecialchars($sender),$row["limit"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]).$widget->button("warning",L("EDIT"),$url->write($URL)."?edit=".$row["ID"]));
 	}
 
 	$widget->table(6,L("MAIL_LIMIT"),$table["th"],$table["td"],"dt_lsenders","1:desc");
@@ -81,8 +102,16 @@
 	{
 		$sender = $row["domain"];
 
-		$table["td"][] = array($sender,$row["limit"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]).$widget->button("warning",L("EDIT"),$url->write($URL)."?edit=".$row["ID"]));
-		
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[$sender]))
+            {
+                continue;
+            }    
+        }
+
+
+		$table["td"][] = array(htmlspecialchars($sender),$row["limit"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]).$widget->button("warning",L("EDIT"),$url->write($URL)."?edit=".$row["ID"]));		
 	}
 
 	$widget->table(6,L("DOMAIN_LIMIT"),$table["th"],$table["td"],"dt_ldomains","1:desc");
