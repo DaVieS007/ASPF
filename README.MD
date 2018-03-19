@@ -1,4 +1,4 @@
-# ASPF 
+# ASPF
 ## Advanced SPAM Processing Filter
 ### Part of MVCP Mass Virtualhost Control Panel (BSD)
 
