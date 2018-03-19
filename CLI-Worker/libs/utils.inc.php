@@ -117,7 +117,7 @@
     function __gethostbyname($host) 
     {
         $SOA = dns_get_record($host, DNS_SOA);
-        if(count($SOA) > 0)
+        if(1 == 1 || count($SOA) > 0) // Ugly but marked as future work, scoring subdomains
         {
             $dns6 = dns_get_record($host, DNS_AAAA);
             $dns4 = dns_get_record($host, DNS_A);
