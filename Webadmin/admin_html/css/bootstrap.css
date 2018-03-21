@@ -6478,8 +6478,10 @@ button.close {
 .nav:after,
 .navbar:before,
 .navbar:after,
+/*
 .navbar-header:before,
 .navbar-header:after,
+*/
 .navbar-collapse:before,
 .navbar-collapse:after,
 .pager:before,
