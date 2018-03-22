@@ -7,13 +7,13 @@
     function banner(&$client,$state,$message)
     {
         global $config;
-        safe_send($client,"action=PREPEND X-ASPF: !".strtoupper($state)." (".$message.") | see: https://aspf.npulse.net\n");
+        safe_send($client,"action=PREPEND X-ASPF: !".strtoupper($state)." (".$message.") | see: https://npulse.net/aspf\n");
     }
 
     function banner2(&$client,$state,$message)
     {
         global $config;
-        safe_send($client,"action=PREPEND X-ASPF-S: !".strtoupper($state)." (".$message.") | see: https://aspf.npulse.net\n");
+        safe_send($client,"action=PREPEND X-ASPF-S: !".strtoupper($state)." (".$message.") | see: https://npulse.net/aspf\n");
     }
     /** BANNER **/
 
