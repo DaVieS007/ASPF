@@ -4,6 +4,7 @@
     /** DAEMONIZE **/
     if($argv[1] == "-daemon")
     {
+	error_reporting(0);
         umask(0);
 	    $opid = getmypid();
         $DAEMONIZED = true;
@@ -29,7 +30,6 @@
 
     ini_set("log_errors", 1);
     ini_set("error_log", "/var/log/aspf-php.log");
-    error_reporting(0); // IMPORTANT IN DAEMON MODE DUE TO NO STDOUT/STDERR (!!!)
 
     /** C_STANDARD/LET_IT_GLOBAL **/
     $config = array();

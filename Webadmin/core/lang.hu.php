@@ -47,7 +47,7 @@ $L["gray_learn_expire"] = "Auto-Learn Lejárata (nap)";
 $L["gray_cache_expire"] = "Gyorsítótár Lejárata (nap)";
 $L["limit_mails_per_user"] = "Levélküldési Ráta felhasználóként / 5perc";
 $L["enable_limit_reject"] = "Küldés megtiltása ha túllépte a kvótát";
-$L["notify_command"] = "Külső alkalmazás indítása ha egy felhasználó túllépte a kvótáját";
+$L["notify_command"] = "Adjon meg Mail -t, URL -t vagy parancsot értesítésként ha valaki kifelé spammel.";
 
 $L["logout"] = "Kijelentkezés";
 $L["title"] = "ASPF";

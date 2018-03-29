@@ -40,7 +40,7 @@
         {
             $msg = "ASPF: Your message is rejected due sender domain is on blacklist until: ".sdate($domain_rule["expire"]);
             add_transaction($DB,$sender,$recipient,"blacklist",$msg,"",$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);            
-            return "reject";
+            return "blacklist";
         }
         /** TRY BLACKLIST **/
 
@@ -49,7 +49,7 @@
         if($sender_rule["type"] == "blacklist")
         {
             $msg = "ASPF: Your message is rejected due sender address is on blacklist until: ".sdate($sender_rule["expire"]);
-            return "reject";
+            return "blacklist";
         }
         /** TRY BLACK/WHITELIST **/
 
@@ -80,6 +80,15 @@
         {
             $ts = time() - 60*5; // 5 Minute
             $count = $DB->query("SELECT COUNT(ID) AS IDX FROM transactions WHERE sender = '".$DB->escape($sender)."' AND tstamp > '".$ts."'")->fetch_array()["IDX"];
+            $ip_count = $DB->query("SELECT COUNT(ID) AS IDX FROM transactions WHERE sender_ip = '".$DB->escape($srv_info["client_ip"])."' AND tstamp > '".$ts."'")->fetch_array()["IDX"];
+
+            if($ip_count > $limit)
+            {
+                $msg = "ASPF: Your message rejected due to exceeded ".$limit." / 5 Minutes limit, try again later.";
+                add_transaction($DB,$sender,$recipient,"limit",$msg,"",$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
+                return "reject-domain";
+            }
+
             if($count > $limit)
             {
                 if($reject_on_limit)

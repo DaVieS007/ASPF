@@ -118,22 +118,58 @@
                 mlog("Limit","NOTICE","Limit Reached (Notify): ".$arr["real_sender"]." -> ".$arr["recipient"]);                
                 safe_send($client,"action=dunno\n");
                 safe_send($client,"\n");
-
+                
                 if($config["ANTISPAM"]["notify_command"])
                 {
-                    shell_exec($config["ANTISPAM"]["notify_command"]);                    
+                    notify($DB,$config["ANTISPAM"]["notify_command"],$ret,$arr,$srv_info);
                 }
+
                 return false;
             }
-            else if($ret == "reject")
+            else if($ret == "reject" || $ret == "reject-domain" || $ret == "blacklist")
             {
-                mlog("Limit","NOTICE","Limit Reached (Reject): ".$arr["real_sender"]." -> ".$arr["recipient"]);                
+                if($ret == "blacklist")
+                {
+                    mlog("Limit","NOTICE","Sender Blacklisted (Reject): ".$arr["real_sender"]." -> ".$arr["recipient"]);                
+                }
+                else if($ret == "reject-domain")
+                {
+                    mlog("Limit","NOTICE","Sender IP Limit Reached (BlackList Whole Domain): ".$arr["real_sender"]." -> ".$arr["recipient"]);                                    
+                }
+                else
+                {
+                    mlog("Limit","NOTICE","Sender Limit Reached (Reject): ".$arr["real_sender"]." -> ".$arr["recipient"]);                                                        
+                }
+
                 safe_send($client,"action=REJECT ".$msg."\n");
                 safe_send($client,"\n");
 
-                if($config["ANTISPAM"]["notify_command"])
+                if($ret == "reject-domain" || $ret == "blacklist")
                 {
-                    shell_exec($config["ANTISPAM"]["notify_command"]);                    
+                    $domain = explode("@",$arr["real_sender"])[1];
+                    $ts = time() + 60*15; //15 MINS
+                    
+                    $bl = $DB->query("SELECT * FROM domains WHERE domain = '".$DB->escape($domain)."'")->fetch_array(MYSQLI_ASSOC);
+                    if(!$bl)
+                    {
+                        mlog("Limit","NOTICE","Sender Domain Blacklisted: ".$domain);                                    
+                        $DB->query("INSERT INTO domains (domain,type,expire) VALUES ('".$DB->escape($domain)."','blacklist','".$ts."');");
+                    }
+                    else
+                    {
+                        if($bl["type"] != "whitelist" && $bl["expire"] < $ts)
+                        {
+                            $DB->query("UPDATE domains SET type = 'blacklist', expire = '".$ts."' WHERE domain = '".$DB->escape($domain)."'");    
+                        }
+                    }    
+                }
+
+                if($ret != "blacklist")
+                {
+                    if($config["ANTISPAM"]["notify_command"])
+                    {
+                        notify($DB,$config["ANTISPAM"]["notify_command"],$ret,$arr,$srv_info);
+                    }
                 }
                 return false;                                    
             }

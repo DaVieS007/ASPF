@@ -49,7 +49,7 @@ $L["gray_learn_expire"] = "Auto-Learn Expire (day)";
 $L["gray_cache_expire"] = "Cache Expire (day)";
 $L["limit_mails_per_user"] = "Limiting Outgoing Sending per user / 5 minutes";
 $L["enable_limit_reject"] = "Reject sending when user limit his rate";
-$L["notify_command"] = "Execute an application when user reach his limit";
+$L["notify_command"] = "Enter mail or URL or command to execute when outgoing spamming";
 
 $L["logout"] = "Log-Out";
 $L["title"] = "ASPF";

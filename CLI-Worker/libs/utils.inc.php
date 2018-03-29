@@ -454,6 +454,81 @@
     }
     /** PROBE_MX **/
 
+    /** NOTIFY **/
+    function notify(&$DB,$cmd,$ret,$arr,$srv)
+    {
+        print_r($cmd);
+        $domain = explode("@",$arr["real_sender"])[1];
+        $state = $DB->query("SELECT * FROM state WHERE `key` = '".$DB->escape("notify_".$domain)."'")->fetch_array(MYSQLI_ASSOC);
+        if($state["tstamp"] < (time() - 3600) || !$state)
+        {
+            if($state["tstamp"])
+            {
+                $DB->query("UPDATE state SET tstamp = '".time()."' WHERE `key` = '".$DB->escape($row["key"])."'");
+            }
+            else
+            {
+                $DB->query("INSERT INTO state (`key`,tstamp) VALUES ('".$DB->escape("notify_".$domain)."','".time()."');");
+            }
+
+            $dinfo = array();
+            $tmp = $arr;
+            while(list($k,$v) = each($tmp))
+            {
+                $dinfo[] = $k."=".urlencode($v);
+            }
+
+            $tmp = $srv;
+            while(list($k,$v) = each($tmp))
+            {
+                $dinfo[] = $k."=".urlencode($v);
+            }
+        
+            if(strstr($cmd,"@"))
+            {
+                $to      = $cmd;
+                $subject = 'ASPF | Outgoing SPAM ALERT: '.$arr["real_sender"]." / ".$domain;
+                $message = "Automated message from ASPF, Please Do-NOT-Reply!\r\nTechnical Informations:\r\n\r\n";
+
+                while(list($k,$v) = each($arr))
+                {
+                    $message .= str_pad ($k, 25, $pad_string = " ", STR_PAD_RIGHT);
+                    $message .= $v."\r\n";
+                }
+
+                while(list($k,$v) = each($srv))
+                {
+                    $message .= str_pad ($k, 25, $pad_string = " ", STR_PAD_RIGHT);
+                    $message .= $v."\r\n";
+                }
+                
+                $hostname = trim(shell_exec("/bin/hostname")); // BSD & LINUX COMPAT;
+                $from = 'aspf-noreply@'.$hostname;
+                $headers = 'From: '. $from . "\r\nContent-Type: text/plain";
+                if(!mail($cmd, $subject, $message, $headers," -f ".$from))
+                {
+                    mlog("Notify","Error","Could not send mail: ".$cmd);
+                }
+                else
+                {
+                    mlog("Notify","Info","Mail Sent: ".$from." <->".$cmd);
+                }
+            }
+            else if(strstr($cmd,"://"))
+            {
+                if(!file_get_contents($cmd."?state=".$ret."&".implode("&",$dinfo)))
+                {
+                    mlog("Notify","Error","Could not send data to: ".$cmd);                    
+                }
+            }
+            else
+            {
+                mlog("Notify","ERROR","Invalid Notification Parameter: ".$cmd);
+            }
+        }
+    }
+    /** NOTIFY **/
+
     /** ADD_TRANSACTION **/
     function add_transaction(&$DB,$real_sender,$recipient,$action,$msg,$msg2,$smtp_ip,$smtp_reverse,$client_ip,$client_reverse)
     {
