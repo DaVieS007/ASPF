@@ -13,7 +13,7 @@
     $syslog = NULL;
 
     require "config.inc.php";
-    require "core/url_nolang.inc.php";
+    require "core/url.inc.php";
     require "core/mysql.inc.php";
     require "core/lang.inc.php";
     require "core/registry_fs.inc.php";
