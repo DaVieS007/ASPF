@@ -103,7 +103,7 @@ ALTER TABLE `live_stat`
 
 ALTER TABLE `mail_limit`
   ADD PRIMARY KEY (`ID`),
-  ADD UNIQUE KEY `address` (`address`),
+  ADD KEY `address` (`address`),
   ADD KEY `domain` (`domain`);
 
 ALTER TABLE `nodes`
