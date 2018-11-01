@@ -169,6 +169,7 @@
                 {
                     if($config["ANTISPAM"]["notify_command"])
                     {
+                        $arr["answer"] = $msg;
                         notify($DB,$config["ANTISPAM"]["notify_command"],$ret,$arr,$srv_info);
                     }
                 }
