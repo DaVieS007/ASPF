@@ -6,6 +6,16 @@
     {
         $target = $_POST["sender"];
         $access = true;
+
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[explode("@",$target)[1]]) && !isset($allowed_domains[$target]))
+            {
+                $access = false;
+                $widget->form_note("danger",L("ACCESS_DENIED"));
+            }    
+        }
+
         if($access)
         {
             if(strstr($target,"@"))
@@ -70,6 +80,14 @@
 	while($row = $res->fetch_array())
 	{
 		$sender = $row["address"];
+
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[explode("@",$sender)[1]]))
+            {
+                continue;
+            }    
+        }
 		$table["td"][] = array(htmlspecialchars($sender),$row["limit"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]).$widget->button("warning",L("EDIT"),$url->write($URL)."?edit=".$row["ID"]));
 	}
 
@@ -83,6 +101,16 @@
 	while($row = $res->fetch_array())
 	{
 		$sender = $row["domain"];
+
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[$sender]))
+            {
+                continue;
+            }    
+        }
+
+
 		$table["td"][] = array(htmlspecialchars($sender),$row["limit"],$widget->button("danger",L("REMOVE"),$url->write($URL)."?remove=".$row["ID"]).$widget->button("warning",L("EDIT"),$url->write($URL)."?edit=".$row["ID"]));		
 	}
 

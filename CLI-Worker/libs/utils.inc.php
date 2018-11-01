@@ -457,7 +457,6 @@
     /** NOTIFY **/
     function notify(&$DB,$cmd,$ret,$arr,$srv)
     {
-        print_r($cmd);
         $domain = explode("@",$arr["real_sender"])[1];
         $state = $DB->query("SELECT * FROM state WHERE `key` = '".$DB->escape("notify_".$domain)."'")->fetch_array(MYSQLI_ASSOC);
         if($state["tstamp"] < (time() - 3600) || !$state)
@@ -487,7 +486,7 @@
             if(strstr($cmd,"@"))
             {
                 $to      = $cmd;
-                $subject = 'ASPF | Outgoing SPAM ALERT: '.$arr["real_sender"]." / ".$domain;
+                $subject = 'ASPF | Outgoing SPAM/SPOOF ALERT: '.$arr["real_sender"]." / ".$domain;
                 $message = "Automated message from ASPF, Please Do-NOT-Reply!\r\nTechnical Informations:\r\n\r\n";
 
                 while(list($k,$v) = each($arr))
@@ -503,7 +502,7 @@
                 }
                 
                 $hostname = trim(shell_exec("/bin/hostname")); // BSD & LINUX COMPAT;
-                $from = 'aspf-noreply@'.$hostname;
+                $from = 'aspf-daemon@'.$hostname;
                 $headers = 'From: '. $from . "\r\nContent-Type: text/plain";
                 if(!mail($cmd, $subject, $message, $headers," -f ".$from))
                 {

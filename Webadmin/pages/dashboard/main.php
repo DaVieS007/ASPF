@@ -55,10 +55,13 @@
 			$mitigation_level["4"] = L("MITIGATION_4");
 			$mitigation_level["5"] = L("MITIGATION_5");
 			
-			
+			$widget->form_note("warning",L("GREY_LISTING_HELP"));
+			$widget->form_note("warning",L("SPOOF_PROTECT_HELP"));
 
-			$widget->form_select("SPAM_DETECT|spam_mitigation_level",L("MITIGATION_LEVEL"),"",$mitigation_level,$config["SPAM_DETECT"]["spam_mitigation_level"],2);
-			$widget->form_select("SPAM_DETECT|drop_mail_instead_of_mark_spam",L("DROP_MAIL_INSTEAD_OF_MARK"),"",$sel,$config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"],2);
+			$widget->form_select("SPAM_DETECT|spam_mitigation_level",L("MITIGATION_LEVEL"),"",$mitigation_level,$config["SPAM_DETECT"]["spam_mitigation_level"],4);
+			$widget->form_select("SPAM_DETECT|drop_mail_instead_of_mark_spam",L("DROP_MAIL_INSTEAD_OF_MARK"),"",$sel,$config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"],3);
+			$widget->form_select("SPAM_DETECT|enable_graylist",L("GREY_LISTING"),"",$sel,$config["SPAM_DETECT"]["enable_graylist"],4);
+			$widget->form_select("SPAM_DETECT|spoof_protect",L("SPOOF_PROTECT"),"",$sel,$config["SPAM_DETECT"]["spoof_protect"],4);
 			$widget->form_sep();
 			$widget->form_text("SPAM_DETECT|rbl_list",L("RBL_LIST"),"",str_replace(",","\n",$config["SPAM_DETECT"]["rbl_list"]));						
 			$widget->form_sep();			
@@ -148,12 +151,13 @@
 		
 		$ts = time() - 3600*$config["show_latest"];
 		$sent = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE action = 'sent' AND tstamp > '".$ts."'")->fetch_array()["CC"];
-		$reject = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'limit') AND tstamp > '".$ts."'")->fetch_array()["CC"];
-	
+		$limit = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'limit' OR action = 'spoof') AND tstamp > '".$ts."'")->fetch_array()["CC"];
 		$accept = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE action = 'accept' AND tstamp > '".$ts."'")->fetch_array()["CC"];
-		$dunno = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'dunno' OR action = 'reject') AND tstamp > '".$ts."'")->fetch_array()["CC"];
+		$dunno = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'dunno') AND tstamp > '".$ts."'")->fetch_array()["CC"];
+		$reject = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'reject') AND tstamp > '".$ts."'")->fetch_array()["CC"];
+		$grey = $DB->query("SELECT COUNT(ID) AS CC FROM transactions WHERE (action = 'grey') AND tstamp > '".$ts."'")->fetch_array()["CC"];
 	
-		$total = $sent + $reject + $dunno + $accept;
+		$total = $sent + $reject + $dunno + $accept + $limit + $grey;
 		$tp = 100 / $total;
 	
 		$widget->head(12,$config["show_latest"]." ".L("HISTORY"));
@@ -163,8 +167,10 @@
 		
 		$sent_p = $tp * $sent;
 		$reject_p = $tp * $reject;
+		$limit_p = $tp * $limit;
 		$accept_p = $tp * $accept;
 		$dunno_p = $tp * $dunno;
+		$grey_p = $tp * $grey;
 	
 		/** STAT **/
 		if(isset($_GET["ajax"]) && $_GET["ajax"] == "stat-info")
@@ -172,9 +178,11 @@
 			$table = array();
 			$table["th"] = array("","","");
 			$table["td"][] = array(L("MAIL_SENT")."<br />".$widget->progress("primary",$sent_p),$sent,round($sent_p)."%");
-			$table["td"][] = array(L("MAIL_REJECT_TO_SEND")."<br />".$widget->progress("warning",$reject_p),$reject,round($reject_p)."%");
 			$table["td"][] = array(L("MAIL_ACCEPT")."<br />".$widget->progress("success",$accept_p),$accept,round($accept_p)."%");
-			$table["td"][] = array(L("MAIL_CAUGHT")."<br />".$widget->progress("danger",$dunno_p),$dunno,round($dunno_p)."%");
+			$table["td"][] = array(L("MAIL_CAUGHT")."<br />".$widget->progress("warning",$dunno_p),$dunno,round($dunno_p)."%");
+			$table["td"][] = array(L("MAIL_GREY_PENDING")."<br />".$widget->progress("info",$grey_p),$grey,round($grey_p)."%");
+			$table["td"][] = array(L("MAIL_REJECT_TO_SEND")."<br />".$widget->progress("danger",$limit_p),$limit,round($limit_p)."%");
+			$table["td"][] = array(L("MAIL_REJECT")."<br />".$widget->progress("danger",$reject_p),$reject,round($reject_p)."%");
 			
 			$arr = array();
 			$arr["data"] = bin2hex(utf8_decode($widget->rtable(12,$total." ".L("MAIL_PASSED"),$table["th"],$table["td"])));
@@ -186,29 +194,60 @@
 		{
 			$widget->ajax_load(12,L("LOADING"),"?ajax=stat-info",1000);
 		}
+		$A = $widget->row();
 		/** STAT **/	
 	
 		/** NODES **/
 		$table = array();
-		$table["th"] = array(L("NODE_NAME"),L("NODE_LAST_SEEN"),"");
+		$table["th"] = array(L("NODE_NAME"),L("SETTINGS"),L("NODE_LAST_SEEN"),"");
 		$res = $DB->query("SELECT * FROM nodes;");
 		while($row = $res->fetch_array())
 		{
+			$settings = array();
+			$_settings = json_decode($row["settings"],true);
+			$settings[] = $widget->badge("Lv-".$_settings["SPAM_DETECT"]["spam_mitigation_level"],"primary");
+			if($_settings["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"])
+			{
+				$settings[] = $widget->badge(L("DROP_SPAM"),"info");
+			}
+			else
+			{
+				$settings[] = $widget->badge(L("MARK_SPAM"),"info");
+			}
+
+			if($_settings["SPAM_DETECT"]["enable_graylist"])
+			{
+				$settings[] = $widget->badge(L("GREY_LISTING"),"success");
+			}
+			else
+			{
+				$settings[] = $widget->badge(L("GREY_LISTING"),"danger");
+			}
+
+			if($_settings["SPAM_DETECT"]["spoof_protect"])
+			{
+				$settings[] = $widget->badge(L("SPOOF_PROTECT"),"success");
+			}
+			else
+			{
+				$settings[] = $widget->badge(L("SPOOF_PROTECT"),"danger");
+			}
+
 			$nurl = $URL;
 			$nurl[2] = "node:".$row["ID"];
-			$table["td"][] = array($row["name"],date($config["date_format"],$row["last_seen"]),$widget->button("danger",L("EDIT"),$url->write($nurl)));
+			$table["td"][] = array($row["name"],implode(" ",$settings),date($config["date_format"],$row["last_seen"]),$widget->button("danger",L("EDIT"),$url->write($nurl)));
 			
 		}
 		
 		$widget->table(12,"",$table["th"],$table["td"]);
 		/** NODES **/	
 	
-		$A = $widget->row();
+		$C = $widget->row();
 	
 		/** LAST_LIMITED **/
 		$table = array();
 		$table["th"] = array(L("SENDER"),L("DATE"),"");
-		$res = $DB->query("SELECT COUNT(ID) AS CC,ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND action = 'limit' GROUP BY sender ORDER BY `tstamp` DESC");
+		$res = $DB->query("SELECT COUNT(ID) AS CC,ID,sender, action, tstamp FROM `transactions` WHERE tstamp > '".$ts."'  AND (action = 'limit' OR action = 'spoof') GROUP BY sender ORDER BY `tstamp` DESC");
 		while($row = $res->fetch_array())
 		{
 			$sender = mailb($row["sender"]);
@@ -220,6 +259,10 @@
 			else if($row["action"] == "limit")
 			{
 				$sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("LIMITED"),"primary");
+			}
+			else if($row["action"] == "spoof")
+			{
+				$sender .= "<br />".$widget->badge(L("OUTGOING"),"danger")."  ".$widget->badge(L("SPOOF"),"primary");
 			}
 			else if($row["action"] == "reject")
 			{
@@ -245,12 +288,13 @@
 	
 		$widget->add($widget->col(6,$A));
 		$widget->add($widget->col(6,$B));
+		$widget->add($widget->col(12,$C));
 		$CONTENT .= $widget->row();	
 	
 		/** TOP OUTGOING SPAM **/
 		$table = array();
 		$table["th"] = array(L("SENDER"),L("COUNT"),"");
-		$res = $DB->query("SELECT COUNT(ID) AS CC, sender, action FROM `transactions` WHERE tstamp > '".$ts."' AND (action = 'sent' OR action = 'limit' OR action = 'blacklist') GROUP BY sender ORDER BY `CC` DESC LIMIT 0,50");
+		$res = $DB->query("SELECT COUNT(ID) AS CC, sender, action FROM `transactions` WHERE tstamp > '".$ts."' AND (action = 'sent' OR action = 'limit' OR action = 'blacklist' OR action = 'spoof') GROUP BY sender ORDER BY `CC` DESC LIMIT 0,200");
 		while($row = $res->fetch_array())
 		{
 			$sender = mailb($row["sender"]);
@@ -261,6 +305,10 @@
 			else if($row["action"] == "limit")
 			{
 				$sender .= "<br />".$widget->badge(L("LIMITED"),"primary");
+			}
+			else if($row["action"] == "spoof")
+			{
+				$sender .= "<br />".$widget->badge(L("SPOOF"),"primary");
 			}
 			else
 			{
@@ -281,7 +329,7 @@
 		/** TOP INCOMING SPAM **/
 		$table = array();
 		$table["th"] = array(L("SENDER"),L("COUNT"),"");
-		$res = $DB->query("SELECT COUNT(ID) AS CC, sender, action FROM `transactions` WHERE tstamp > '".$ts."' AND (action = 'accept' OR action = 'dunno' OR action = 'reject') GROUP BY sender ORDER BY `CC` DESC LIMIT 0,50");
+		$res = $DB->query("SELECT COUNT(ID) AS CC, sender, action FROM `transactions` WHERE tstamp > '".$ts."' AND (action = 'accept' OR action = 'dunno' OR action = 'reject') GROUP BY sender ORDER BY `CC` DESC LIMIT 0,200");
 		while($row = $res->fetch_array())
 		{
 			$sender = mailb($row["sender"]);
@@ -292,6 +340,10 @@
 			else if($row["action"] == "dunno")
 			{
 				$sender .= "<br />".$widget->badge(L("DUNNO"),"warning");
+			}
+			else if($row["action"] == "grey")
+			{
+				$sender .= "<br />".$widget->badge(L("MAIL_GREY_PENDING"),"primary");
 			}
 			else
 			{

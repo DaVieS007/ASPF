@@ -248,7 +248,7 @@ EOF;
 		{
 			$text = str_replace("<","&lt;",$text);
 			$text = str_replace(">","&gt;",$text);
-			$this->temp .= $this->col($col,'<pre class="">'.$text.'</pre>');
+			$this->temp .= $this->col($col,'<pre style="white-space: pre-wrap; word-wrap: break-word;" class="">'.$text.'</pre>');
 		}
 		/** CODE **/
 
@@ -257,7 +257,7 @@ EOF;
 		{
 			$text = str_replace("<","&lt;",$text);
 			$text = str_replace(">","&gt;",$text);
-			$this->temp .= $this->col($col,'<pre class="label-warning">'.$text.'</pre>');
+			$this->temp .= $this->col($col,'<pre style="white-space: pre-wrap; word-wrap: break-word;" class="label-warning">'.$text.'</pre>');
 		}
 		/** CODE **/
 		
@@ -266,7 +266,7 @@ EOF;
 		{
 			$text = str_replace("<","&lt;",$text);
 			$text = str_replace(">","&gt;",$text);
-			return $this->col($col,'<pre>'.$text.'</pre>');
+			return $this->col($col,'<pre style="white-space: pre-wrap; word-wrap: break-word;">'.$text.'</pre>');
 		}
 		/** RCODE **/
 

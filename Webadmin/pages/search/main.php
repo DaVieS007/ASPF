@@ -47,6 +47,15 @@
 
             $access = true;
 
+            if($auth->reseller())
+            {
+                if(!isset($allowed_domains[explode("@",$sender)[1]]) && !isset($allowed_domains[explode("@",$recipient)[1]]))
+                {
+                    unset($URL[3]);
+                    $url->go($URL);
+                }    
+            }
+    
 
             /** PROCESS **/
             $exts = time() + 365*24*3600; // 1 Year
@@ -205,6 +214,14 @@
         $table["th"] = array(L("SENDER"),L("RECIPIENT"),L("SMTP_NAME"),L("SENDER_NAME"),L("DATE"),"");
 
         $access = true;
+        if($auth->reseller())
+        {
+            if(!isset($allowed_domains[$URL[2]]) && !isset($allowed_domains[explode("@",$URL[2])[1]]))
+            {
+                $access = false;
+            }    
+        }
+
         if($access)
         {
             $res = $DB->query("SELECT ID,smtp_ip,smtp_name,sender_ip,sender_name,sender,recipient,action, tstamp FROM `transactions` WHERE tstamp > '".$ts."' AND (sender LIKE '%".$DB->escape($URL[2])."%' OR recipient LIKE '%".$DB->escape($URL[2])."%' ) ORDER BY tstamp DESC LIMIT 0,1000");

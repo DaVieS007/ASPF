@@ -4,7 +4,7 @@
 	{
 		$CONTENT = file_get_contents("admin_html/sample.html");
 	}
-	elseif($URL[1] == "dashboard")
+	elseif($URL[1] == "dashboard" && $auth->admin())
 	{
 		require "pages/dashboard/main.php";
 	}
@@ -12,15 +12,15 @@
 	{
 		require "pages/search/main.php";
 	}
-        elseif($URL[1] == "fast_search")
-        {
-                require "pages/fast_search/main.php";
-        }
-	elseif($URL[1] == "whitelist")
+	elseif($URL[1] == "whitelist" && $auth->admin())
 	{
 		require "pages/whitelist/main.php";
 	}
-	elseif($URL[1] == "blacklist")
+	elseif($URL[1] == "fast_search")
+	{
+		require "pages/fast_search/main.php";
+	}
+	elseif($URL[1] == "blacklist" && $auth->admin())
 	{
 		require "pages/blacklist/main.php";
 	}

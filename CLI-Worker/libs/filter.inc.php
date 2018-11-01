@@ -7,7 +7,8 @@
     function banner(&$client,$state,$message)
     {
         global $config;
-        safe_send($client,"action=PREPEND X-ASPF: !".strtoupper($state)." (".$message.") | see: https://npulse.net/aspf\n");
+        $data = "action=PREPEND X-ASPF: !".strtoupper($state)." (".$message.") | see: https://npulse.net/aspf\n";
+        safe_send($client,$data);
     }
 
     function banner2(&$client,$state,$message)
@@ -42,15 +43,6 @@
             $arr[$var[0]] = $var[1];
         }
 
-        if(isset($arr["sasl_username"]) && $arr["sasl_username"])
-        {
-            $arr["real_sender"] = $arr["sasl_username"];            
-        }
-        else
-        {
-            $arr["real_sender"]  = $arr["sender"];
-        }
-
         /** utc=utc@domain.ex **/
         /** SOME MAKEUP **/
         if(strstr($arr["sender"],"="))
@@ -65,7 +57,17 @@
                 }
             }
         }
-        
+
+        if(isset($arr["sasl_username"]) && $arr["sasl_username"])
+        {
+            $arr["real_sender"] = $arr["sasl_username"];            
+        }
+        else
+        {
+            $arr["real_sender"]  = $arr["sender"];
+        }
+
+
         if(strstr($arr["recipient"],"="))
         {
             $tmp = explode("=",$arr["recipient"]);
@@ -81,8 +83,6 @@
         /** SOME MAKEUP **/
         /** PARSE INPUT **/
         
-
-
         /** 
             sasl_username = set if came from postfix (authed)
             exim_auth=plain = limit
@@ -114,6 +114,7 @@
             }
             else if($ret == "notify")
             {
+                $arr["answer"] = $msg;
                 banner2($client,"PASSED","Gray");
                 mlog("Limit","NOTICE","Limit Reached (Notify): ".$arr["real_sender"]." -> ".$arr["recipient"]);                
                 safe_send($client,"action=dunno\n");
@@ -177,7 +178,6 @@
         }
         else
         {
-
             /** DUNNO **/
             if(!trim($arr["real_sender"]))
             {
@@ -248,7 +248,7 @@
             {
                 if($config["SPAM_DETECT"]["drop_mail_instead_of_mark_spam"])
                 {
-                    mlog("Validate","NOTICE","[".$msg."] ".$arr["sender"]." -> ".$arr["recipient"]);
+                    mlog("Validate","NOTICE","[".$msg."] ".$arr["real_sender"]." -> ".$arr["recipient"]);
                     safe_send($client,"action=REJECT ".$msg."\n");
                     safe_send($client,"\n");
                     add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
@@ -256,7 +256,7 @@
                 }
                 else
                 {
-                    mlog("Validate","NOTICE","[".$msg2."] ".$arr["sender"]." -> ".$arr["recipient"]);
+                    mlog("Validate","NOTICE","[".$msg2."] ".$arr["real_sender"]." -> ".$arr["recipient"]);
                     banner($client,"REJECT",$msg2);
                     safe_send($client,"action=dunno\n");
                     safe_send($client,"\n");
@@ -266,7 +266,7 @@
             }
             else if($ret == "reject")
             {
-                mlog("Validate","NOTICE","[REJECT] ".$arr["sender"]." -> ".$arr["recipient"]);
+                mlog("Validate","NOTICE","[REJECT] ".$arr["real_sender"]." -> ".$arr["recipient"]);
                 safe_send($client,"action=REJECT ".$msg."\n");
                 safe_send($client,"\n");
                 add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
@@ -274,18 +274,25 @@
             }
             else if($ret == "accept")
             {
-                mlog("Validate","NOTICE","[PASSED] ".$arr["sender"]." -> ".$arr["recipient"]);
+                mlog("Validate","NOTICE","[PASSED] ".$arr["real_sender"]." -> ".$arr["recipient"]);
                 banner($client,"PASSED",$msg2);
                 safe_send($client,"action=dunno\n");
                 safe_send($client,"\n");
                 add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
                 return false;                        
-        }
+            }
+            else if($ret == "grey")
+            {
+                mlog("Validate","NOTICE","[GREYED] ".$arr["real_sender"]." -> ".$arr["recipient"]);
+                safe_send($client,"action=defer_if_permit ".$msg."\n");
+                safe_send($client,"\n");
+                add_transaction($DB,$arr["real_sender"],$arr["recipient"],$ret,$msg,$msg2,$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
+                return false;                        
+            }
             /** VALIDATE INCOMING MESSAGES **/            
     }
             
 /*
-
     request=smtpd_access_policy
     protocol_state=RCPT
     protocol_name=ESMTP

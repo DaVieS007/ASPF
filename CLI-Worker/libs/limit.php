@@ -34,6 +34,19 @@
         $srv_info["client_ip"] = $client_address;
         $srv_info["client_name"] = $client_name;
 
+        /** SPOOFING **/
+        if($config["SPAM_DETECT"]["spoof_protect"] >= 1)
+        {
+            if(isset($arr["sasl_username"]) && $arr["sasl_username"] != $arr["sender"])
+            {
+                $msg = "ASPF: The mail system does not allow to send spoofed messages. ( ".$arr["sasl_username"]." != ".$arr["sender"]." )";
+                add_transaction($DB,$sender,$recipient,"spoof",$msg,"",$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
+                return "reject";
+            }
+        }
+        /** SPOOFING **/
+
+
         /** TRY BLACKLIST **/
         $domain_rule = $DB->query("SELECT type,expire FROM domains WHERE domain = '".$DB->escape($sender_domain)."' AND expire > '".time()."';")->fetch_array();
         if($domain_rule["type"] == "blacklist")

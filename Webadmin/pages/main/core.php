@@ -8,9 +8,18 @@
 	/** REDIRECT_TO_DEFAULT **/
 	if($URL[1] == "")
 	{
-		$nurl = $URL;
-		$nurl[1] = "dashboard";
-		$url->go($nurl);
+		if($auth->reseller())
+		{
+			$nurl = $URL;
+			$nurl[1] = "search";
+			$url->go($nurl);	
+		}
+		else
+		{
+			$nurl = $URL;
+			$nurl[1] = "dashboard";
+			$url->go($nurl);	
+		}
 	}
 	/** REDIRECT_TO_DEFAULT **/
 

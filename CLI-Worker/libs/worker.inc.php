@@ -64,6 +64,7 @@
         }
 
         $read = socket_read($client,4096,PHP_BINARY_READ);
+//        echo($read);
 
         $postfix_sign = "request=smtpd_access_policy";
         if(substr($read,0,strlen($postfix_sign)) == $postfix_sign)

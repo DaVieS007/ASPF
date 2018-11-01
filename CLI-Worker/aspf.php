@@ -186,6 +186,10 @@
     $clients = array();
     $nodes = array();
     $last_update = 0;
+    $last_cron = 0;
+    $CRON_PID = 0;
+
+
 
     while(true)
     {
@@ -239,6 +243,28 @@
                 }
             }
     
+            /** LAST PSEUDO-CRON **/
+            if($last_cron + 60 < time())
+            {
+                if($CRON_PID == 0 || pcntl_waitpid($CRON_PID, $status, WNOHANG) != 0)
+                {
+                    $CRON_PID = pcntl_fork();
+                    if(!$CRON_PID)
+                    {
+                        $MDB = new database_handler($config["DATABASE"]["mysql_host"],$config["DATABASE"]["mysql_user"],$config["DATABASE"]["mysql_password"],$config["DATABASE"]["mysql_database"]);
+                        $ts = time() - 3600*24*60;
+                        $MDB->query("DELETE FROM domains WHERE expire < '".time()."'");
+                        $MDB->query("DELETE FROM senders WHERE expire < '".time()."'");
+                        $MDB->query("DELETE FROM transactions WHERE tstamp < '".$ts."'");
+                        $last_cron = time();
+                        die();
+                    }
+                }
+
+                $last_cron = time();
+            }
+            /** LAST PSEUDO-CRON **/
+
             /** UPDATE_CONFIG **/
             if($last_update + 1 < time())
             {
