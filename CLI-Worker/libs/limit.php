@@ -37,9 +37,9 @@
         /** SPOOFING **/
         if($config["SPAM_DETECT"]["spoof_protect"] >= 1)
         {
-            if(isset($arr["sasl_username"]) && $arr["sasl_username"] != $arr["sender"])
+            if(isset($arr["sasl_username"]) && $arr["sasl_username"] != $sender)
             {
-                $msg = "ASPF: The mail system does not allow to send spoofed messages. ( ".$arr["sasl_username"]." != ".$arr["sender"]." )";
+                $msg = "ASPF: The mail system does not allow to send spoofed messages. ( ".$arr["sasl_username"]." != ".$sender." )";
                 add_transaction($DB,$sender,$recipient,"spoof",$msg,"",$srv_info["peer_ip"],$srv_info["peer_name"],$srv_info["client_ip"],$srv_info["client_name"]);
                 return "reject";
             }
