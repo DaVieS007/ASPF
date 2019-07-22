@@ -1,3 +1,10 @@
+# Discounted and not actively maintained anymore
+## This is the early stage of ASPF and it had a great success, but PHP is not suitable for this massive socket operations
+## ASPF completely rewritten into Kinga Framework which is our C/C++ multiplatform(OSX,*NIX,WINDOWS) and squirrel scriptable framework which can replace PHP and solved massive network operations by async nonblocking sockets and able to use MILTER interface.
+## So ASPF-Milter born and handles thousands of emails with 99% filter rate, uses new technology like, only greylist when necessary and can detect botnet activity also mail headers processing available, builtin webserver and very low footprint on memory and CPU.
+##
+## There is a plan to release the new ASPF Code, but Kinga Framework is not OSS product at the moment
+
 # ASPF
 ## Advanced SPAM Processing Filter
 ### Part of MVCP Mass Virtualhost Control Panel (BSD)
